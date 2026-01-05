@@ -1,10 +1,11 @@
 {
   "name": "once_sidepanel",
   "version": "0.0.1",
-  "description": "See it once in chrome sidepanel",
+  "description": "Once in firefox sidepanel",
   "main": "dist/main.js",
   "scripts": {
-    "b2": "webpack --config webpack/webpack.config.js"
+    "b2": "webpack --config webpack/webpack.config.js",
+    "webex": "web-ext build --source-dir ./dist"
   },
   "author": "",
   "devDependencies": {
