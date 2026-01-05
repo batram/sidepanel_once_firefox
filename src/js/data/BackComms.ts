@@ -9,10 +9,13 @@ export class BackComms {
     throw new Error("Method not implemented. sendTo")
   }
 
+  static handlers: any[string] = []
+
   static handlex(
     arg0: string,
     arg1: (event: any, cmd: any, ...args: unknown[]) => Promise<unknown>
   ) {
+    BackComms.handlers[arg0] = arg1
     browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       ;(async function () {
         if (msg.cmd == arg0) {
@@ -28,8 +31,13 @@ export class BackComms {
 
   static async invoke(...args: any[]): Promise<any> {
     console.log("invoke", args)
-    let cmd = args.shift()
-    return OnceSettings.instance.handle(null, cmd, args)
+    let handle = args.shift()
+    let handler = BackComms.handlers[handle]
+    if (handler) {
+      return handler(null, args.shift(), args)
+    } else {
+      return OnceSettings.instance.handle(null, handle, args)
+    }
     return new Promise(async (resolve, reject) => {
       console.log("browser.runtime.id", browser.runtime.id)
       const response = await browser.runtime.sendMessage(browser.runtime.id, {
