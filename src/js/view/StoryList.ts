@@ -247,7 +247,12 @@ async function reload(): Promise<void> {
     x.outerHTML = ""
   })
 
-  OnceSettings.remote.grouped_story_sources().then((grouped_story_sources) => {
-    story_loader.load(grouped_story_sources)
-  })
+  const grouped_story_sources =
+    await OnceSettings.instance.grouped_story_sources()
+
+  if (grouped_story_sources) {
+    story_loader.parallel_load_stories(grouped_story_sources)
+  } else {
+    console.error("no sources", grouped_story_sources)
+  }
 }

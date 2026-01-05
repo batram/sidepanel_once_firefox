@@ -143,16 +143,16 @@ export class SettingsPanel {
 
   async reset_couch_settings(): Promise<void> {
     const couch_input = document.querySelector<HTMLInputElement>("#couch_input")
-    couch_input.value = await OnceSettings.remote.get_sync_url()
+    couch_input.value = await OnceSettings.instance.get_sync_url()
   }
 
   save_couch_settings(): void {
     const couch_input = document.querySelector<HTMLInputElement>("#couch_input")
-    OnceSettings.remote.set_sync_url(couch_input.value)
+    OnceSettings.instance.set_sync_url(couch_input.value)
   }
 
   async restore_theme_settings(): Promise<void> {
-    const theme_value = await OnceSettings.remote.pouch_get("theme", "dark")
+    const theme_value = await OnceSettings.instance.pouch_get("theme", "dark")
 
     const theme_select =
       document.querySelector<HTMLSelectElement>("#theme_select")
@@ -166,7 +166,7 @@ export class SettingsPanel {
   }
 
   async restore_animation_settings(): Promise<void> {
-    const checked = await OnceSettings.remote.pouch_get("animation", true)
+    const checked = await OnceSettings.instance.pouch_get("animation", true)
 
     const anim_checkbox =
       document.querySelector<HTMLInputElement>("#anim_checkbox")
@@ -206,7 +206,7 @@ export class SettingsPanel {
   async set_sources_area(): Promise<void> {
     const sources_area =
       document.querySelector<HTMLInputElement>("#sources_area")
-    const story_sources = await OnceSettings.remote.story_sources()
+    const story_sources = await OnceSettings.instance.story_sources()
     sources_area.value = story_sources.join("\n")
   }
 
@@ -222,7 +222,7 @@ export class SettingsPanel {
 
   async set_filter_area(): Promise<void> {
     const filter_area = document.querySelector<HTMLInputElement>("#filter_area")
-    const filter_list = await OnceSettings.remote.get_filterlist()
+    const filter_list = await OnceSettings.instance.get_filterlist()
     filter_area.value = filter_list.join("\n")
   }
 
@@ -237,7 +237,7 @@ export class SettingsPanel {
   async set_redirect_area(): Promise<void> {
     const redirect_area =
       document.querySelector<HTMLInputElement>("#redirect_area")
-    const redirect_list = await OnceSettings.remote.get_redirectlist()
+    const redirect_list = await OnceSettings.instance.get_redirectlist()
     redirect_area.value = OnceSettings.present_redirectlist(redirect_list)
   }
 
