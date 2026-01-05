@@ -27,7 +27,8 @@
     "contextMenus",
     "storage",
     "history",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "tabs"
   ],
   "action": {
     "default_icon": {

@@ -50,6 +50,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   })
 
+  browser.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
+    console.log(tabId, changeInfo, tab)
+    let cw = await browser.windows.getCurrent()
+
+    if (tab.active && tab.windowId == cw.id) {
+      update_selected(tab.url)
+    }
+  })
+
   document.querySelectorAll<HTMLElement>(".collapsebutton").forEach((x) => {
     x.onclick = collapse_menu
   })
@@ -70,29 +79,13 @@ function collapse_menu() {
   }
 }
 
-browser.tabs.onActivated.addListener(async function (activeInfo) {
-  console.log(activeInfo)
-  let cw = await browser.windows.getCurrent()
-  if (activeInfo.windowId == cw.id) {
-    /* browser.tabs.query(
-      { currentWindow: true, active: true },
-      function (tabArray) {
-        update_selected(tabArray[0].url)
-      }
-    )*/
-  }
-})
-
-browser.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
-  console.log(tabId, changeInfo, tab)
-  let cw = await browser.windows.getCurrent()
-
-  if (tab.active && tab.windowId == cw.id) {
-    update_selected(tab.url)
-  }
-})
-
 async function update_selected(href: string) {
+  // ReaderMode: Extract and decode the original URL from the query string
+  if (href.startsWith("about:reader?url=")) {
+    const urlParams = new URLSearchParams(href.replace("about:reader", ""))
+    href = decodeURIComponent(urlParams.get("url"))
+  }
+
   const selected_container = document.querySelector("#selected_container")
   let selected_story_el =
     selected_container.querySelector<StoryListItem>("story-item")
