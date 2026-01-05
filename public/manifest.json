@@ -9,8 +9,7 @@
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "Once_Sidepanel_0.0.1@batr.am",
-      "strict_min_version": "54.0a1"
+      "id": "once_sidepanel_f@zmarn.com"
     }
   },
 
@@ -38,7 +37,7 @@
   },
   "host_permissions": ["<all_urls>"],
   "background": {
-    "scripts": ["browser-polyfill.js", "background.js"]
+    "scripts": ["background.js"]
   },
 
   "commands": {
