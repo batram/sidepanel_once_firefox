@@ -4,13 +4,11 @@ import * as Readability from "../../third_party/Readability.js"
 import { TabWrangler } from "../../view/TabWrangler"
 import { BackComms } from "../../data/BackComms"
 import { StoryMap } from "../../data/StoryMap"
+import { Presenter, PresenterOptions } from "../../view/presenters_frontend"
 
 export const description = "Presents contents of a webpage in more readable way"
 
-export const presenter_options: Record<
-  string,
-  { value: boolean | string; description: string }
-> = {
+export const presenter_options: PresenterOptions = {
   urlbar_button: {
     value: true,
     description: "show outline-button in urlbar",
@@ -30,13 +28,13 @@ export const presenter_options: Record<
 }
 
 //check for more uniq data url
-const data_outline_url = "data:text/html;charset=utf-8,<!--outline-->"
+const data_outline_url = "about:reader?url="
 const outline_proto = "outline://data"
 const data_outline_url_fail = "data:text/plain;charset=utf-8,outline%20failed"
 
 //let current_tab: WebTab
 
-export function handle_url(): boolean {
+export async function handle_url(_: string): Promise<boolean> {
   return false
 }
 
@@ -93,23 +91,63 @@ export function story_elem_button(story: Story): HTMLElement {
     }
   })
 
-  outline_btn.addEventListener("mouseup", async (event) => {
-    outline_btn.parentElement
-      .querySelector(".read_btn")
-      .classList.add("user_interaction")
+  outline_btn.addEventListener("mouseup", async (e: MouseEvent) => {
+    if (e.button === 2) return
 
-    if (event.button == 0) {
-      //TabWrangler.ops.send_or_create_tab("outline", story.href)
-    } else if (event.button == 1) {
-      event.preventDefault()
-      event.stopPropagation()
-      //TabWrangler.ops.send_to_new_tab("outline", story.href)
-      return false
+    outline_btn.parentElement
+      ?.querySelector(".read_btn")
+      ?.classList.add("user_interaction")
+    await StoryMap.remote.persist_story_change(story.href, "read_state", "read")
+
+    // Use the helper function instead of encodeToReaderModeUrl
+    if (e.button === 1) {
+      // Middle click
+      e.preventDefault()
+      e.stopPropagation()
+      openInReaderMode(story.href, true)
+    } else if (e.button === 0) {
+      // Left click
+      openInReaderMode(story.href, false)
     }
-    //TODO: show cache options on 2?
   })
 
   return outline_btn
+}
+
+async function openInReaderMode(url: string, newTab: boolean = false) {
+  let tab: browser.tabs.Tab
+  if (newTab) {
+    // Create the tab with the standard URL first
+    tab = await browser.tabs.create({ url })
+  } else {
+    // Update current tab to the standard URL
+    tab = await browser.tabs.update({ url })
+  }
+
+  // Wait for the page to be "article-ready" so Firefox can enter Reader Mode
+  browser.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
+    if (tabId === tab.id && changeInfo.isArticle) {
+      browser.tabs.toggleReaderMode(tabId)
+      browser.tabs.onUpdated.removeListener(listener)
+    }
+  })
+}
+
+async function openInCurrentTab(url: string) {
+  // Query for the active tab in the window where the sidebar is open
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+
+  if (tabs.length > 0) {
+    // Update the URL of the found active tab
+    browser.tabs.update(tabs[0].id, { url: url })
+  }
+}
+
+function openInNewTab(url: string) {
+  browser.tabs.create({
+    url: url,
+    active: true, // Set to false if you want it to open in the background
+  })
 }
 
 export function init_in_webtab(): void {
@@ -374,4 +412,9 @@ async function google_cache(url: string) {
     console.error("fetch", e)
   }
   return null
+}
+
+function encodeToReaderModeUrl(originalUrl: string): string {
+  const encodedUrl = encodeURIComponent(originalUrl)
+  return `about:reader?url=${encodedUrl}`
 }

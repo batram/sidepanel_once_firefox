@@ -2,6 +2,7 @@
 //import * as fs from "fs"
 import { Story } from "../data/Story"
 import { StoryListItem } from "./StoryListItem"
+import * as outline from "./presenters/outline"
 
 export declare interface PresenterOptions {
   story_button: {
@@ -30,20 +31,9 @@ let presenters: Presenter[] = []
 function get_active(): Presenter[] {
   if (presenters.length == 0) {
     //TODO: determine if active from settings
-    const normalizedPath = "" //path.join(__dirname, "presenters")
 
-    presenters = [] /* fs
-      .readdirSync(normalizedPath)
-      .map((file_name: string) => {
-        //TODO: better check
-        if (file_name.endsWith(".js")) {
-          return require(path.join(normalizedPath, file_name))
-        }
-      })
-      .filter(
-        (presenter) =>
-          presenter != undefined && presenter.present && presenter.description
-      )*/
+    //hardcode in available presenters, maybe dynamic am Sankt-Nimmerleins-Tag
+    presenters = [outline as Presenter]
   }
 
   return presenters
