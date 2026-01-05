@@ -40,13 +40,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     console.error("no sources", grouped_story_sources)
   }
-  /*
-  browser.tabs.query(
-    { currentWindow: true, active: true },
-    function (tabArray) {
-      update_selected(tabArray[0].url)
+
+  browser.tabs.onActivated.addListener(async (activeInfo) => {
+    const win = await browser.windows.getCurrent()
+    const tab = await browser.tabs.get(activeInfo.tabId)
+    console.log("Tab switched, new URL:", tab, win.id, tab.windowId)
+    if (tab.windowId == win.id) {
+      update_selected(tab.url)
     }
-  )*/
+  })
 
   document.querySelectorAll<HTMLElement>(".collapsebutton").forEach((x) => {
     x.onclick = collapse_menu
