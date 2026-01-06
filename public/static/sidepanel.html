@@ -96,11 +96,22 @@
               </div>
               <div class="settings_block">
                 CouchDB Sync:
-                <input
-                  id="couch_input"
-                  type="text"
-                  placeholder="https://cred:entials@couchdb.example.org/once"
-                />
+                <div class="couch-container masked">
+                  <div class="couch-highlights"></div>
+                  <input
+                    id="couch_input"
+                    type="text"
+                    spellcheck="false"
+                    placeholder="https://cred:entials@couchdb.example.org/once"
+                  />
+                  <button
+                    id="couch_toggle"
+                    class="icon-btn"
+                    title="Toggle password visibility"
+                  >
+                    👁️
+                  </button>
+                </div>
                 <input type="button" value="save" />
                 <input type="button" value="cancel" />
               </div>

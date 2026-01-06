@@ -119,7 +119,69 @@
 }
 
 #couch_input {
+  width: calc(100% - 40px);
+  padding-right: 40px;
+}
+
+.couch-container {
+  position: relative;
+  width: 100%;
   display: block;
-  width: 95%;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
+}
+
+.couch-highlights,
+#couch_input {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 13px;
+  line-height: normal;
+  padding: 5px 35px 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.couch-highlights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-color: transparent;
+  background-color: transparent;
+  color: #ccc; /* Subtle for the masked text */
+  display: flex;
+  align-items: center;
+  z-index: 2;
+  visibility: hidden;
+}
+
+.couch-container.masked .couch-highlights {
+  visibility: visible;
+}
+
+.couch-container.masked #couch_input {
+  color: transparent !important;
+  caret-color: initial; /* Keep caret visible */
+}
+
+#couch_toggle {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 3;
+  padding: 2px 5px;
+  opacity: 0.6;
+}
+
+#couch_toggle:hover {
+  opacity: 1;
 }

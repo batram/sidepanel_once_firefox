@@ -60,16 +60,70 @@ export class SettingsPanel {
     })
 
     const couch_input = document.querySelector<HTMLInputElement>("#couch_input")
-    this.reset_couch_settings()
-    couch_input.parentElement
+    const couch_container = couch_input.parentElement as HTMLElement
+    const couch_highlights =
+      couch_container.querySelector<HTMLElement>(".couch-highlights")
+    const couch_toggle =
+      couch_container.querySelector<HTMLButtonElement>("#couch_toggle")
+
+    const updateCouchHighlights = () => {
+      const val = couch_input.value
+      if (!val) {
+        couch_highlights.textContent = ""
+        return
+      }
+
+      try {
+        const url = new URL(val)
+        if (url.password && couch_container.classList.contains("masked")) {
+          // Mask the password part
+          const maskedPassword = "•".repeat(url.password.length)
+          // Reconstruct the display string: protocol://user:••••@host...
+          // We can't just set url.password because it encodes it
+          // Better to use a simple string rebuild or handle the components
+          // Actually, let's be more robust:
+          // Find the last ':' before '@' and the '@' itself
+          const authEnd = val.lastIndexOf("@")
+          const passStart = val.lastIndexOf(":", authEnd)
+
+          if (passStart !== -1 && passStart < authEnd) {
+            const before = val.substring(0, passStart + 1)
+            const after = val.substring(authEnd)
+            couch_highlights.textContent = before + maskedPassword + after
+          } else {
+            couch_highlights.textContent = val
+          }
+        } else {
+          couch_highlights.textContent = val
+        }
+      } catch (e) {
+        // Not a full URL or invalid, just show as is
+        couch_highlights.textContent = val
+      }
+    }
+
+    couch_toggle.addEventListener("click", (e) => {
+      e.preventDefault()
+      couch_container.classList.toggle("masked")
+      couch_toggle.textContent = couch_container.classList.contains("masked")
+        ? "👁️"
+        : "🙈"
+      updateCouchHighlights()
+    })
+
+    couch_input.addEventListener("input", updateCouchHighlights)
+
+    this.reset_couch_settings().then(() => updateCouchHighlights())
+
+    couch_container.parentElement
       .querySelector('input[value="save"]')
       .addEventListener("click", () => {
         this.save_couch_settings()
       })
-    couch_input.parentElement
+    couch_container.parentElement
       .querySelector('input[value="cancel"]')
       .addEventListener("click", () => {
-        this.reset_couch_settings()
+        this.reset_couch_settings().then(() => updateCouchHighlights())
       })
 
     this.set_sources_area()
