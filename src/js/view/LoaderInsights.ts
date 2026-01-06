@@ -50,6 +50,11 @@ export class LoaderInsights {
 
     if (url) {
       this.failedSources.set(url, detailedMessage || message)
+      // Proactively update Settings highlights in background
+      OnceSettings.instance.highlightSources(
+        Object.fromEntries(this.failedSources),
+        false
+      )
     }
 
     const errorEl = document.createElement("div")

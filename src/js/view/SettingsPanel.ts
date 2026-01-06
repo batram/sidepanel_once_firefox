@@ -22,7 +22,10 @@ export class SettingsPanel {
           this.set_sources_area()
           break
         case "highlight_sources":
-          this.highlight_sources(args[0] as Record<string, string>)
+          this.highlight_sources(
+            args[0] as Record<string, string>,
+            args[1] as boolean
+          )
           break
         case "restore_theme_settings":
           console.debug("restore_theme_settings", args)
@@ -369,12 +372,17 @@ export class SettingsPanel {
 
   failedSources: Record<string, string> = {}
 
-  public highlight_sources(failedSources: Record<string, string>): void {
+  public highlight_sources(
+    failedSources: Record<string, string>,
+    shouldOpenPanel = true
+  ): void {
     console.log("SettingsPanel: highlighting sources", failedSources)
     this.failedSources = failedSources
 
-    // Switch panel to settings directly
-    menu.open_panel("settings")
+    if (shouldOpenPanel) {
+      // Switch panel to settings directly
+      menu.open_panel("settings")
+    }
 
     const sources_area =
       document.querySelector<HTMLTextAreaElement>("#sources_area")
@@ -386,21 +394,23 @@ export class SettingsPanel {
     // Trigger update
     sources_area.dispatchEvent(new Event("input"))
 
-    // Scroll to first error
-    const urls = Object.keys(failedSources)
-    if (urls.length > 0) {
-      const text = sources_area.value
-      const url = urls[0]
-      const idx = text.indexOf(url)
-      if (idx !== -1) {
-        console.log("SettingsPanel: scrolling to", url)
-        sources_area.focus()
-        sources_area.setSelectionRange(idx, idx + url.length)
-        // blur/focus hack to attempt scroll to selection
-        sources_area.blur()
-        sources_area.focus()
-      } else {
-        console.warn("SettingsPanel: could not find url in sources", url)
+    if (shouldOpenPanel) {
+      // Scroll to first error
+      const urls = Object.keys(failedSources)
+      if (urls.length > 0) {
+        const text = sources_area.value
+        const url = urls[0]
+        const idx = text.indexOf(url)
+        if (idx !== -1) {
+          console.log("SettingsPanel: scrolling to", url)
+          sources_area.focus()
+          sources_area.setSelectionRange(idx, idx + url.length)
+          // blur/focus hack to attempt scroll to selection
+          sources_area.blur()
+          sources_area.focus()
+        } else {
+          console.warn("SettingsPanel: could not find url in sources", url)
+        }
       }
     }
   }
