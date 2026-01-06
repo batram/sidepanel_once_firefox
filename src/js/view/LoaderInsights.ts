@@ -106,6 +106,9 @@ export class LoaderInsights {
 
   static resetErrors(): void {
     this.failedSources.clear()
+    // Clear highlights in Settings panel
+    OnceSettings.instance.highlightSources({}, false)
+
     // Optionally remove existing error elements if we want a fresh start ui-wise too
     const container = document.querySelector("#notification_container")
     if (container) {
