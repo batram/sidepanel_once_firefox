@@ -1,0 +1,36 @@
+html,
+body {
+  background-color: var(--main-bg-color);
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: content-box;
+  font-family: Verdana, Geneva, sans-serif;
+  user-select: none;
+}
+
+.active_drag * {
+  pointer-events: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0000008c;
+  border: 2px solid grey;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.7;
+}

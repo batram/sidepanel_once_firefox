@@ -1,0 +1,40 @@
+#settings_panel {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-direction: column;
+  display: none;
+}
+
+#settings_panel .bar {
+  height: 28px;
+}
+#settings_panel .settings_title {
+  font-size: 13px;
+  margin-top: 7px;
+}
+
+.settings_container {
+  height: 100%;
+  overflow: scroll;
+}
+
+#settings_panel .settings_block {
+  font-size: 13px;
+  padding: 15px;
+  margin: 5px;
+  border-bottom: thin solid var(--border-color);
+}
+
+#settings_panel textarea {
+  display: block;
+  width: 95%;
+  min-height: 200px;
+  margin-bottom: 2px;
+}
+
+#couch_input {
+  display: block;
+  width: 95%;
+  margin-bottom: 2px;
+}

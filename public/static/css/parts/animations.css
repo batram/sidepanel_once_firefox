@@ -1,0 +1,128 @@
+/* Keyframes */
+@keyframes roll_gadient {
+  0% {
+    background-position-x: -200px;
+  }
+  100% {
+    background-position-x: 0;
+  }
+}
+
+@keyframes death_spin {
+  0% {
+    content: url(../../imgs/star_fill.svg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(0.2);
+    content: url(../../imgs/star_fill.svg);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  40%,
+  50%,
+  70%,
+  90%,
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  30% {
+    transform: translateY(-10px) rotate(5deg) scale(1.2);
+  }
+  60% {
+    transform: translateY(-8px) rotate(-5deg) scale(1.2);
+  }
+  80% {
+    transform: translateY(-12px) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes fillup {
+  0% {
+    clip-path: inset(100% 0% 0% 0%);
+  }
+  30% {
+    clip-path: inset(100% 0% 0% 0%);
+  }
+  40% {
+    clip-path: inset(65% 0% 0% 0%);
+  }
+  60% {
+    clip-path: inset(65% 0% 0% 0%);
+  }
+  70% {
+    clip-path: inset(40% 0% 0% 0%);
+  }
+  80% {
+    clip-path: inset(35% 0% 0% 0%);
+  }
+  100% {
+    clip-path: inset(0% 0% 0% 0%);
+  }
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation Classes */
+body[animated="true"] #left_panel .pseudo_active .bar {
+  animation: roll_gadient 2s cubic-bezier(0, 0, 0.15, 0.99);
+  background: radial-gradient(
+    at 50% 223%,
+    var(--highlight-bg-color),
+    transparent
+  );
+}
+
+body[animated="true"] #menu .heading:active,
+body[animated="true"] #menu .btn:active {
+  background: var(--highlight-bg-color);
+}
+
+body[animated="true"] #menu .btn:active {
+  filter: saturate(40%) contrast(100%);
+  border-color: var(--border-high-color);
+}
+
+body[animated="true"] .story {
+  transition: margin-left 0.6s cubic-bezier(0.25, 0.1, 0, 1.65);
+}
+
+body[animated="true"] .read_anim {
+  margin-left: 100%;
+}
+
+body[animated="true"] .skipped_anim {
+  margin-left: -100%;
+}
+
+body[animated="true"] .unread_anim {
+  margin-left: -100%;
+}
+
+body[animated="true"] .star_btn.user_interaction::after {
+  animation: death_spin 0.9s cubic-bezier(0, 0, 0.15, 0.99);
+}
+
+body[animated="true"] .stared .user_interaction.star_btn::before {
+  animation: bounce 1.2s cubic-bezier(0, 0, 0.15, 0.99),
+    fillup 1.2s cubic-bezier(0, 0, 0.15, 0.99);
+}
+
+body[animated="true"] .stared .user_interaction.star_btn::after {
+  animation: bounce 1.2s cubic-bezier(0, 0, 0.15, 0.99);
+}
+
+.rotating {
+  animation: rotating 2s linear infinite;
+}

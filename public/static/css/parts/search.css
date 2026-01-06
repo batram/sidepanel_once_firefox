@@ -1,0 +1,64 @@
+#global_search_results {
+  display: none;
+}
+
+#filtered_stories {
+  display: none;
+}
+
+.filter_btn {
+  order: 1;
+}
+
+.filter_btn input {
+  position: relative;
+  top: -4px;
+  height: 16px;
+  margin: 0 1px;
+  order: 1;
+}
+
+.star_btn {
+  order: 3;
+}
+
+.read_btn {
+  order: 4;
+}
+
+#url_target {
+  position: absolute;
+  z-index: 16;
+  background: var(--highlight-bg-color);
+  border-bottom: thin solid var(--border-color);
+  bottom: 0;
+  font-size: 12px;
+  padding: 3px;
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 0.5s ease-out, z-index 0.5s 0s;
+}
+
+#urlfield {
+  padding-left: 8px;
+}
+
+#searchfield {
+  margin-left: -65px;
+  padding-left: 70px;
+}
+
+#cancel_search_btn {
+  margin-left: -28px;
+  visibility: hidden;
+  border: none;
+  border-left: thin solid black;
+  background: none;
+}
+
+#search_scope {
+  z-index: 2;
+  border: none;
+  border-right: thin solid black;
+  background: none;
+}

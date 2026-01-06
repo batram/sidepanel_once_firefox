@@ -1,0 +1,57 @@
+#tab_dropzone {
+  height: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+#tab_dropzone::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+#tab_dropzone::-webkit-scrollbar-thumb {
+  background: #0000008c;
+  border: 1px solid grey;
+}
+
+#tab_dropzone .tab,
+#tab_dropzone #addtab_button {
+  min-width: 140px;
+  border: thin solid var(--border-high-color);
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  margin-bottom: -5px;
+  padding: 4px;
+  height: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  margin-left: 2px;
+  font-size: 13px;
+  user-select: none;
+}
+
+#tab_dropzone .active {
+  background: var(--border-high-color);
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+#tab_dropzone #addtab_button {
+  min-width: 10px;
+}
+
+.tab {
+  display: flex;
+}
+
+.tab[media="started"] .tab_mediastate {
+  width: 16px;
+  background: url("../../imgs/play.svg");
+  display: block;
+}
+
+.tab[media="paused"] .tab_mediastate {
+  width: 16px;
+  background: url("../../imgs/pause.svg");
+  display: block;
+}
