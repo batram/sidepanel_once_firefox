@@ -7,9 +7,17 @@ export class LoaderInsights {
 
     const container = document.querySelector("#stories_panel")
     if (container) {
+      // Check if container already exists (retry mechanics)
+      let notifContainer = document.querySelector("#notification_container")
+      if (!notifContainer) {
+        notifContainer = document.createElement("div")
+        notifContainer.id = "notification_container"
+        container.appendChild(notifContainer)
+      }
+
       this.el = document.createElement("div")
       this.el.id = "loader_insights"
-      container.appendChild(this.el)
+      notifContainer.appendChild(this.el)
     }
   }
 
@@ -22,6 +30,28 @@ export class LoaderInsights {
     if (this.timeout) {
       clearTimeout(this.timeout)
     }
+  }
+
+  static showError(message: string): void {
+    const container = document.querySelector("#notification_container")
+    if (!container) return
+
+    const errorEl = document.createElement("div")
+    errorEl.classList.add("loader_error")
+    errorEl.innerText = message
+    errorEl.onclick = () => {
+      errorEl.classList.remove("visible")
+      setTimeout(() => errorEl.remove(), 300)
+    }
+    container.appendChild(errorEl)
+
+    // Trigger reflow to enable transition
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _ = errorEl.offsetHeight
+
+    requestAnimationFrame(() => {
+      errorEl.classList.add("visible")
+    })
   }
 
   static hide(): void {

@@ -41,22 +41,33 @@ export async function parallel_load_stories(
     const group = story_groups[group_name]
     group.map((source_entry) => {
       promises.push(
-        cache_load(source_entry, try_cache).then((stories) => {
-          let domain = "source"
-          try {
-            domain = new URL(source_entry).hostname.replace("www.", "")
-          } catch {
-            domain = source_entry.substring(0, 20)
-          }
+        cache_load(source_entry, try_cache)
+          .then((stories) => {
+            let domain = "source"
+            try {
+              domain = new URL(source_entry).hostname.replace("www.", "")
+            } catch {
+              domain = source_entry.substring(0, 20)
+            }
 
-          LoaderInsights.show("Processed " + domain)
-          process_story_input(stories, group_name)
-        })
+            LoaderInsights.show("Processed " + domain)
+            process_story_input(stories, group_name)
+          })
+          .catch((e) => {
+            console.error(e)
+            LoaderInsights.showError(
+              "Failed to load " + source_entry.substring(0, 30)
+            )
+          })
       )
     })
   }
 
-  await Promise.all(promises)
+  try {
+    await Promise.all(promises)
+  } catch (e) {
+    console.error(e)
+  }
   LoaderInsights.hide()
 }
 
