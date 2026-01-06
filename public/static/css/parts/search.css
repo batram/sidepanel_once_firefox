@@ -6,26 +6,6 @@
   display: none;
 }
 
-.filter_btn {
-  order: 1;
-}
-
-.filter_btn input {
-  position: relative;
-  top: -4px;
-  height: 16px;
-  margin: 0 1px;
-  order: 1;
-}
-
-.star_btn {
-  order: 3;
-}
-
-.read_btn {
-  order: 4;
-}
-
 #url_target {
   position: absolute;
   z-index: 16;

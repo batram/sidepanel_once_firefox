@@ -185,3 +185,24 @@
 .show_stored_star:not(.show_filtered) .stored_star:not(.nomatch) {
   display: flex;
 }
+
+/* Toolbar Buttons Ordering */
+.filter_btn {
+  order: 1;
+}
+
+.filter_btn input {
+  position: relative;
+  top: -4px;
+  height: 16px;
+  margin: 0 1px;
+  order: 1;
+}
+
+.star_btn {
+  order: 3;
+}
+
+.read_btn {
+  order: 4;
+}

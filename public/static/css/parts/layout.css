@@ -54,34 +54,6 @@
   overflow: hidden;
 }
 
-#menu .sub {
-  border-top: thin solid var(--border-high-color);
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  flex-direction: column;
-}
-
-#menu .heading {
-  display: flex;
-  padding: 5px;
-}
-
-#menu .heading p {
-  padding-left: 3px;
-  margin: 0;
-}
-
-#menu.collapse .heading p,
-#menu.collapse .type,
-#menu.collapse .group {
-  display: none;
-}
-
-#menu.collapse {
-  flex: 0 0 28px;
-}
-
 #left_main {
   display: flex;
   flex-direction: column;
