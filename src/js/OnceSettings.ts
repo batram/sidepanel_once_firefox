@@ -450,15 +450,15 @@ export class OnceSettings {
     OnceSettings.parse_redirectlist(`https:\\/\\/www.reddit.com\\/(.*) => https://old.reddit.com/$1
          https:\\/\\/(mobile.)?twitter.com\\/(.*) => https://nitter.cc/$1`)
 
-  async highlightSources(urls: string[]): Promise<void> {
-    console.log("OnceSettings: highlightSources", urls)
+  async highlightSources(failedSources: Record<string, string>): Promise<void> {
+    console.log("OnceSettings: highlightSources", failedSources)
     if (SettingsPanel.instance) {
-      SettingsPanel.instance.highlight_sources(urls)
+      SettingsPanel.instance.highlight_sources(failedSources)
     } else {
       console.warn(
         "OnceSettings: SettingsPanel.instance not found, using BackComms"
       )
-      BackComms.send("settings", "highlight_sources", urls)
+      BackComms.send("settings", "highlight_sources", failedSources)
     }
   }
 }

@@ -22,7 +22,7 @@ export class SettingsPanel {
           this.set_sources_area()
           break
         case "highlight_sources":
-          this.highlight_sources(args[0] as string[])
+          this.highlight_sources(args[0] as Record<string, string>)
           break
         case "restore_theme_settings":
           console.debug("restore_theme_settings", args)
@@ -106,36 +106,45 @@ export class SettingsPanel {
 
       const lines = text.split("\n")
 
-      lines.forEach((line, lineIndex) => {
-        let isFailedUrl = false
-        for (const url of this.failed_urls) {
+      lines.forEach((line) => {
+        let errorMessage: string | null = null
+        for (const [url, message] of Object.entries(this.failedSources)) {
           if (!url) continue
           if (line.trim() === url.trim()) {
-            isFailedUrl = true
+            errorMessage = message
             break
           }
         }
 
-        if (isFailedUrl) {
-          // Wrap failed URL in a mark element
+        const lineContainer = document.createElement("div")
+        lineContainer.classList.add("line-mirrored")
+
+        if (errorMessage) {
+          lineContainer.classList.add("error-line")
+          const icon = document.createElement("div")
+          icon.classList.add("error-icon")
+          icon.textContent = "❗"
+          icon.title = "Click for error details"
+          icon.style.pointerEvents = "auto"
+          icon.style.cursor = "pointer"
+          icon.onclick = () => {
+            alert(`Error loading source:\n${errorMessage}`)
+          }
+          lineContainer.appendChild(icon)
+
           const mark = document.createElement("mark")
-          mark.textContent = line || " " // Use space for empty lines to preserve height
-          highlights.appendChild(mark)
+          mark.textContent = line || " "
+          lineContainer.appendChild(mark)
         } else {
-          // Regular text node
-          const textNode = document.createTextNode(line || " ")
-          highlights.appendChild(textNode)
+          lineContainer.textContent = line || " "
         }
 
-        // Add newline (except for last line)
-        if (lineIndex < lines.length - 1) {
-          highlights.appendChild(document.createTextNode("\n"))
-        }
+        highlights.appendChild(lineContainer)
       })
     }
 
     const handleScroll = () => {
-      highlights.style.transform = `translateY(-${sources_area.scrollTop}px)`
+      highlights.scrollTop = sources_area.scrollTop
     }
 
     sources_area.addEventListener("input", handleInput)
@@ -304,11 +313,11 @@ export class SettingsPanel {
     BackComms.send("settings", "save_redirectlist", redirect_list)
   }
 
-  failed_urls: string[] = []
+  failedSources: Record<string, string> = {}
 
-  public highlight_sources(urls: string[]): void {
-    console.log("SettingsPanel: highlighting sources", urls)
-    this.failed_urls = urls
+  public highlight_sources(failedSources: Record<string, string>): void {
+    console.log("SettingsPanel: highlighting sources", failedSources)
+    this.failedSources = failedSources
 
     // Switch panel to settings directly
     menu.open_panel("settings")
@@ -324,6 +333,7 @@ export class SettingsPanel {
     sources_area.dispatchEvent(new Event("input"))
 
     // Scroll to first error
+    const urls = Object.keys(failedSources)
     if (urls.length > 0) {
       const text = sources_area.value
       const url = urls[0]

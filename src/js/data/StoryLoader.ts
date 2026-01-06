@@ -56,9 +56,17 @@ export async function parallel_load_stories(
           })
           .catch((e) => {
             console.error(e)
+            const detail = e instanceof Error ? e.message : String(e)
+            let domain = "source"
+            try {
+              domain = new URL(source_entry).hostname.replace("www.", "")
+            } catch {
+              domain = source_entry.substring(0, 20)
+            }
             LoaderInsights.showError(
-              "Failed to load " + source_entry.substring(0, 30),
-              source_entry
+              `Failed: ${domain}`,
+              source_entry,
+              `Source: ${source_entry}\nError: ${detail}`
             )
           })
       )
@@ -128,6 +136,8 @@ async function cache_load(url: string, try_cache = true) {
     const resp = await fetch(url)
     if (resp.ok) {
       return story_parser.parse_response(resp, url, og_url) || []
+    } else {
+      throw new Error(`HTTP ${resp.status}: ${resp.statusText}`)
     }
   }
 }

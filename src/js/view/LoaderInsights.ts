@@ -3,7 +3,7 @@ import { OnceSettings } from "../OnceSettings"
 export class LoaderInsights {
   private static el: HTMLElement | null = null
   private static timeout: NodeJS.Timeout | null = null
-  private static failedUrls: Set<string> = new Set()
+  private static failedSources: Map<string, string> = new Map()
 
   static init(): void {
     if (this.el) return
@@ -35,17 +35,21 @@ export class LoaderInsights {
     }
   }
 
-  static showError(message: string, url?: string): void {
+  static showError(
+    message: string,
+    url?: string,
+    detailedMessage?: string
+  ): void {
     const container = document.querySelector("#notification_container")
     if (!container) return
 
     // Deduplicate: if this URL already has an error displayed, skip
-    if (url && this.failedUrls.has(url)) {
+    if (url && this.failedSources.has(url)) {
       return
     }
 
     if (url) {
-      this.failedUrls.add(url)
+      this.failedSources.set(url, detailedMessage || message)
     }
 
     const errorEl = document.createElement("div")
@@ -69,15 +73,8 @@ export class LoaderInsights {
 
     // Clicking the main area navigates to settings
     errorEl.onclick = () => {
-      if (url) {
-        const urlsToHighlight = [
-          url,
-          ...Array.from(this.failedUrls).filter((u) => u !== url),
-        ]
-        OnceSettings.instance.highlightSources(urlsToHighlight)
-      } else if (this.failedUrls.size > 0) {
-        OnceSettings.instance.highlightSources(Array.from(this.failedUrls))
-      }
+      const failedMap = Object.fromEntries(this.failedSources)
+      OnceSettings.instance.highlightSources(failedMap)
 
       errorEl.classList.remove("visible")
       setTimeout(() => errorEl.remove(), 300)
@@ -103,7 +100,7 @@ export class LoaderInsights {
   }
 
   static resetErrors(): void {
-    this.failedUrls.clear()
+    this.failedSources.clear()
     // Optionally remove existing error elements if we want a fresh start ui-wise too
     const container = document.querySelector("#notification_container")
     if (container) {
