@@ -36,6 +36,7 @@ export async function parallel_load_stories(
   try_cache = true
 ): Promise<void> {
   const promises: Promise<void>[] = []
+  LoaderInsights.resetErrors()
   for (const group_name in story_groups) {
     menu.add_group(group_name)
     const group = story_groups[group_name]
@@ -56,7 +57,8 @@ export async function parallel_load_stories(
           .catch((e) => {
             console.error(e)
             LoaderInsights.showError(
-              "Failed to load " + source_entry.substring(0, 30)
+              "Failed to load " + source_entry.substring(0, 30),
+              source_entry
             )
           })
       )

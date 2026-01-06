@@ -1,8 +1,11 @@
 import { OnceSettings } from "../OnceSettings"
 import { BackComms } from "../data/BackComms"
+import * as menu from "./menu"
 
 export class SettingsPanel {
+  static instance: SettingsPanel
   constructor() {
+    SettingsPanel.instance = this
     BackComms.send("settings", "subscribe_to_changes")
     BackComms.on("settings", async (event, cmd: string, ...args: unknown[]) => {
       switch (cmd) {
@@ -17,6 +20,9 @@ export class SettingsPanel {
         case "set_sources_area":
           console.debug("set_sources_area", args)
           this.set_sources_area()
+          break
+        case "highlight_sources":
+          this.highlight_sources(args[0] as string[])
           break
         case "restore_theme_settings":
           console.debug("restore_theme_settings", args)
@@ -70,12 +76,13 @@ export class SettingsPanel {
 
     const sources_area =
       document.querySelector<HTMLInputElement>("#sources_area")
-    sources_area.parentElement
+    const sources_block = sources_area.closest(".settings_block")
+    sources_block
       .querySelector('input[value="save"]')
       .addEventListener("click", () => {
         this.save_sources_settings()
       })
-    sources_area.parentElement
+    sources_block
       .querySelector('input[value="cancel"]')
       .addEventListener("click", () => {
         this.set_sources_area()
@@ -91,15 +98,61 @@ export class SettingsPanel {
       }
     })
 
+    const highlights = document.querySelector<HTMLElement>(".highlights")
+
+    const handleInput = () => {
+      const text = sources_area.value
+      highlights.innerHTML = ""
+
+      const lines = text.split("\n")
+
+      lines.forEach((line, lineIndex) => {
+        let isFailedUrl = false
+        for (const url of this.failed_urls) {
+          if (!url) continue
+          if (line.trim() === url.trim()) {
+            isFailedUrl = true
+            break
+          }
+        }
+
+        if (isFailedUrl) {
+          // Wrap failed URL in a mark element
+          const mark = document.createElement("mark")
+          mark.textContent = line || " " // Use space for empty lines to preserve height
+          highlights.appendChild(mark)
+        } else {
+          // Regular text node
+          const textNode = document.createTextNode(line || " ")
+          highlights.appendChild(textNode)
+        }
+
+        // Add newline (except for last line)
+        if (lineIndex < lines.length - 1) {
+          highlights.appendChild(document.createTextNode("\n"))
+        }
+      })
+    }
+
+    const handleScroll = () => {
+      highlights.style.transform = `translateY(-${sources_area.scrollTop}px)`
+    }
+
+    sources_area.addEventListener("input", handleInput)
+    sources_area.addEventListener("scroll", handleScroll)
+    // Initial sync
+    handleInput()
+
     this.set_filter_area()
 
     const filter_area = document.querySelector<HTMLInputElement>("#filter_area")
-    filter_area.parentElement
+    const filter_block = filter_area.closest(".settings_block")
+    filter_block
       .querySelector('input[value="save"]')
       .addEventListener("click", () => {
         this.save_filter_settings()
       })
-    filter_area.parentElement
+    filter_block
       .querySelector("input[value=cancel]")
       .addEventListener("click", () => {
         this.set_filter_area()
@@ -119,12 +172,13 @@ export class SettingsPanel {
 
     const redirect_area =
       document.querySelector<HTMLInputElement>("#redirect_area")
-    redirect_area.parentElement
+    const redirect_block = redirect_area.closest(".settings_block")
+    redirect_block
       .querySelector('input[value="save"]')
       .addEventListener("click", () => {
         this.save_redirect_settings()
       })
-    redirect_area.parentElement
+    redirect_block
       .querySelector("input[value=cancel]")
       .addEventListener("click", () => {
         this.set_redirect_area()
@@ -205,14 +259,16 @@ export class SettingsPanel {
 
   async set_sources_area(): Promise<void> {
     const sources_area =
-      document.querySelector<HTMLInputElement>("#sources_area")
+      document.querySelector<HTMLTextAreaElement>("#sources_area")
     const story_sources = await OnceSettings.instance.story_sources()
     sources_area.value = story_sources.join("\n")
+    // Trigger input event to update highlights
+    sources_area.dispatchEvent(new Event("input"))
   }
 
   async save_sources_settings(): Promise<void> {
     const sources_area =
-      document.querySelector<HTMLInputElement>("#sources_area")
+      document.querySelector<HTMLTextAreaElement>("#sources_area")
     const story_sources = sources_area.value.split("\n").filter((x) => {
       return x.trim() != ""
     })
@@ -246,5 +302,42 @@ export class SettingsPanel {
       document.querySelector<HTMLInputElement>("#redirect_area")
     const redirect_list = OnceSettings.parse_redirectlist(redirect_area.value)
     BackComms.send("settings", "save_redirectlist", redirect_list)
+  }
+
+  failed_urls: string[] = []
+
+  public highlight_sources(urls: string[]): void {
+    console.log("SettingsPanel: highlighting sources", urls)
+    this.failed_urls = urls
+
+    // Switch panel to settings directly
+    menu.open_panel("settings")
+
+    const sources_area =
+      document.querySelector<HTMLTextAreaElement>("#sources_area")
+    if (!sources_area) {
+      console.error("SettingsPanel: sources_area not found!")
+      return
+    }
+
+    // Trigger update
+    sources_area.dispatchEvent(new Event("input"))
+
+    // Scroll to first error
+    if (urls.length > 0) {
+      const text = sources_area.value
+      const url = urls[0]
+      const idx = text.indexOf(url)
+      if (idx !== -1) {
+        console.log("SettingsPanel: scrolling to", url)
+        sources_area.focus()
+        sources_area.setSelectionRange(idx, idx + url.length)
+        // blur/focus hack to attempt scroll to selection
+        sources_area.blur()
+        sources_area.focus()
+      } else {
+        console.warn("SettingsPanel: could not find url in sources", url)
+      }
+    }
   }
 }

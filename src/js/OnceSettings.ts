@@ -4,6 +4,7 @@ import { Story } from "./data/Story"
 import { Redirect, URLRedirect } from "./data/URLRedirect"
 //import * as fs from "fs"
 import { BackComms } from "./data/BackComms"
+import { SettingsPanel } from "./view/SettingsPanel"
 
 export class OnceSettings {
   default_sources = [
@@ -45,7 +46,7 @@ export class OnceSettings {
     },
   }
 
-  subscribers: Number[] = []
+  subscribers: number[] = []
   animated = true
 
   constructor() {
@@ -154,7 +155,7 @@ export class OnceSettings {
   }
 
   async handle(_: any, cmd: string, ...args: any[]) {
-    let argl = args[0]
+    const argl = args[0]
     switch (cmd) {
       case "story_sources":
         return this.story_sources()
@@ -195,7 +196,7 @@ export class OnceSettings {
   }
 
   async get_sync_url(): Promise<string> {
-    let data = await browser.storage.sync.get("sync_url")
+    const data = await browser.storage.sync.get("sync_url")
     return data ? data.sync_url : ""
   }
 
@@ -448,4 +449,16 @@ export class OnceSettings {
   default_redirectlist =
     OnceSettings.parse_redirectlist(`https:\\/\\/www.reddit.com\\/(.*) => https://old.reddit.com/$1
          https:\\/\\/(mobile.)?twitter.com\\/(.*) => https://nitter.cc/$1`)
+
+  async highlightSources(urls: string[]): Promise<void> {
+    console.log("OnceSettings: highlightSources", urls)
+    if (SettingsPanel.instance) {
+      SettingsPanel.instance.highlight_sources(urls)
+    } else {
+      console.warn(
+        "OnceSettings: SettingsPanel.instance not found, using BackComms"
+      )
+      BackComms.send("settings", "highlight_sources", urls)
+    }
+  }
 }

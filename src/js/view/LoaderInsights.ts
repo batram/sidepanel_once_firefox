@@ -1,6 +1,9 @@
+import { OnceSettings } from "../OnceSettings"
+
 export class LoaderInsights {
   private static el: HTMLElement | null = null
   private static timeout: NodeJS.Timeout | null = null
+  private static failedUrls: Set<string> = new Set()
 
   static init(): void {
     if (this.el) return
@@ -32,14 +35,50 @@ export class LoaderInsights {
     }
   }
 
-  static showError(message: string): void {
+  static showError(message: string, url?: string): void {
     const container = document.querySelector("#notification_container")
     if (!container) return
 
+    // Deduplicate: if this URL already has an error displayed, skip
+    if (url && this.failedUrls.has(url)) {
+      return
+    }
+
+    if (url) {
+      this.failedUrls.add(url)
+    }
+
     const errorEl = document.createElement("div")
     errorEl.classList.add("loader_error")
-    errorEl.innerText = message
+
+    // Text span for the message
+    const textSpan = document.createElement("span")
+    textSpan.innerText = message
+    errorEl.appendChild(textSpan)
+
+    // Close button (X)
+    const closeBtn = document.createElement("span")
+    closeBtn.classList.add("error_close")
+    closeBtn.innerText = "×"
+    closeBtn.onclick = (e) => {
+      e.stopPropagation() // Don't navigate to settings
+      errorEl.classList.remove("visible")
+      setTimeout(() => errorEl.remove(), 300)
+    }
+    errorEl.appendChild(closeBtn)
+
+    // Clicking the main area navigates to settings
     errorEl.onclick = () => {
+      if (url) {
+        const urlsToHighlight = [
+          url,
+          ...Array.from(this.failedUrls).filter((u) => u !== url),
+        ]
+        OnceSettings.instance.highlightSources(urlsToHighlight)
+      } else if (this.failedUrls.size > 0) {
+        OnceSettings.instance.highlightSources(Array.from(this.failedUrls))
+      }
+
       errorEl.classList.remove("visible")
       setTimeout(() => errorEl.remove(), 300)
     }
@@ -61,5 +100,14 @@ export class LoaderInsights {
     this.timeout = setTimeout(() => {
       this.el?.classList.remove("visible")
     }, 1000)
+  }
+
+  static resetErrors(): void {
+    this.failedUrls.clear()
+    // Optionally remove existing error elements if we want a fresh start ui-wise too
+    const container = document.querySelector("#notification_container")
+    if (container) {
+      container.querySelectorAll(".loader_error").forEach((el) => el.remove())
+    }
   }
 }
