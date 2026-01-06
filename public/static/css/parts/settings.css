@@ -87,14 +87,14 @@
   z-index: 3;
   pointer-events: none;
   overflow: hidden;
+  color: transparent !important; /* Hide mirrored text */
 }
 
 .input_container .highlights mark {
-  background: rgba(255, 0, 0, 0.15);
-  color: transparent;
-  text-decoration: underline;
-  text-decoration-color: red;
-  text-decoration-style: wavy;
+  background-color: transparent;
+  color: transparent !important; /* Hide mirrored text */
+  text-decoration: underline red wavy;
+  text-decoration-color: red !important; /* Ensure underline is visible despite transparent text */
 }
 
 .input_container .highlights .line-mirrored {
