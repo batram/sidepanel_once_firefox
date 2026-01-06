@@ -3,6 +3,7 @@ import { StoryMap } from "../data/StoryMap"
 import * as menu from "../view/menu"
 import { Story } from "./Story"
 import * as story_filters from "./StoryFilters"
+import { LoaderInsights } from "../view/LoaderInsights"
 
 function get_cached(url: string) {
   let cached = localStorage.getItem(url)
@@ -41,12 +42,22 @@ export async function parallel_load_stories(
     group.map((source_entry) => {
       promises.push(
         cache_load(source_entry, try_cache).then((stories) => {
+          let domain = "source"
+          try {
+            domain = new URL(source_entry).hostname.replace("www.", "")
+          } catch {
+            domain = source_entry.substring(0, 20)
+          }
+
+          LoaderInsights.show("Processed " + domain)
           process_story_input(stories, group_name)
         })
       )
     })
   }
+
   await Promise.all(promises)
+  LoaderInsights.hide()
 }
 
 async function process_story_input(stories: Story[], group_name: string) {
@@ -78,6 +89,14 @@ async function cache_load(url: string, try_cache = true) {
     console.info("no parser for", url)
     return
   }
+
+  let domain = "source"
+  try {
+    domain = new URL(url).hostname.replace("www.", "")
+  } catch {
+    domain = url.substring(0, 20)
+  }
+  LoaderInsights.show("Fetching " + domain)
 
   const og_url = url
 

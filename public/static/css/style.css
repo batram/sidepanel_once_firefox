@@ -105,6 +105,7 @@ option {
   display: none;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
 #left_panel[active_panel="stories"] #stories_panel {
@@ -798,4 +799,26 @@ body[animated="true"] .stared .user_interaction.star_btn::after {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+#loader_insights {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--second-bg-color);
+  color: var(--text-high-color);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  border: thin solid var(--border-color);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#loader_insights.visible {
+  opacity: 0.9;
 }

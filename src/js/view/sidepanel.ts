@@ -10,6 +10,7 @@ import * as story_loader from "../data/StoryLoader"
 import * as story_parser from "../data/parser"
 import { StoryListItem } from "./StoryListItem"
 import { StoryMap } from "../data/StoryMap"
+import { LoaderInsights } from "./LoaderInsights"
 
 //URLRedirect.init()
 
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   new StoryHistory()
   story_list.init()
   side_menu.init()
+  LoaderInsights.init()
   search.init_search()
   story_parser.add_all_css_colors()
   const tab_content = document.querySelector<HTMLElement>("#tab_content")
@@ -52,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   browser.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
     console.log(tabId, changeInfo, tab)
-    let cw = await browser.windows.getCurrent()
+    const cw = await browser.windows.getCurrent()
 
     if (tab.active && tab.windowId == cw.id) {
       update_selected(tab.url)
@@ -87,7 +89,7 @@ async function update_selected(href: string) {
   }
 
   const selected_container = document.querySelector("#selected_container")
-  let selected_story_el =
+  const selected_story_el =
     selected_container.querySelector<StoryListItem>("story-item")
 
   if (selected_story_el && selected_story_el.story.href == href) {
