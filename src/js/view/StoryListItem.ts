@@ -441,7 +441,7 @@ export class StoryListItem extends HTMLElement {
     const comments_link = document.createElement("a")
     comments_link.classList.add("comment_url")
     comments_link.innerText = " [comments] "
-    comments_link.href = sub_story_ob.comment_url
+    comments_link.href = sub_story_ob.comment_url || this.story.href
     info.appendChild(comments_link)
 
     comments_link.addEventListener("click", (e) => {
