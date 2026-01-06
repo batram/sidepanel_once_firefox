@@ -4,13 +4,15 @@ import * as menu from "../view/menu"
 import { Story } from "./Story"
 import * as story_filters from "./StoryFilters"
 import { LoaderInsights } from "../view/LoaderInsights"
+import { CacheStore } from "./CacheStore"
 
-function get_cached(url: string) {
-  let cached = localStorage.getItem(url)
+async function get_cached(url: string) {
+  const cached = await CacheStore.get(url)
   const max_mins = 5000
 
+  if (!cached) return null
+
   try {
-    cached = JSON.parse(cached)
     if (!Array.isArray(cached)) {
       throw "cached entry is not Array"
     }
@@ -102,7 +104,7 @@ async function cache_load(url: string, try_cache = true) {
   let cached = null
   if (try_cache) {
     //TODO: do we need to store the type?
-    cached = get_cached(url)
+    cached = await get_cached(url)
   }
 
   const parser = story_parser.get_parser_for_url(url)
