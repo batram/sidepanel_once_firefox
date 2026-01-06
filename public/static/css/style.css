@@ -781,3 +781,21 @@ body[animated="true"] .stared .user_interaction.star_btn::after {
 ::-webkit-scrollbar-thumb:hover {
   opacity: 0.7;
 }
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.rotating {
+  animation: rotating 2s linear infinite;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

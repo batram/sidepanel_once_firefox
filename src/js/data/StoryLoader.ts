@@ -34,15 +34,19 @@ export async function parallel_load_stories(
   story_groups: Record<string, string[]>,
   try_cache = true
 ): Promise<void> {
+  const promises: Promise<void>[] = []
   for (const group_name in story_groups) {
     menu.add_group(group_name)
     const group = story_groups[group_name]
-    group.map(async (source_entry) => {
-      cache_load(source_entry, try_cache).then((stories) => {
-        process_story_input(stories, group_name)
-      })
+    group.map((source_entry) => {
+      promises.push(
+        cache_load(source_entry, try_cache).then((stories) => {
+          process_story_input(stories, group_name)
+        })
+      )
     })
   }
+  await Promise.all(promises)
 }
 
 async function process_story_input(stories: Story[], group_name: string) {

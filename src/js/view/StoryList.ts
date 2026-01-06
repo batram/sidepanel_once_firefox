@@ -21,7 +21,26 @@ export function init(): void {
     "#reload_stories_btn"
   )
   if (reload_stories_btn) {
-    reload_stories_btn.onclick = reload
+    let clickTimeout: NodeJS.Timeout | null = null
+
+    reload_stories_btn.onclick = () => {
+      if (reload_stories_btn.classList.contains("disabled")) return
+      console.log("reload_stories_btn clicked")
+      if (clickTimeout) clearTimeout(clickTimeout)
+      clickTimeout = setTimeout(() => {
+        reload(true)
+        clickTimeout = null
+      }, 250)
+    }
+    reload_stories_btn.ondblclick = () => {
+      if (reload_stories_btn.classList.contains("disabled")) return
+      console.log("reload_stories_btn double clicked")
+      if (clickTimeout) {
+        clearTimeout(clickTimeout)
+        clickTimeout = null
+      }
+      reload(false)
+    }
   }
 
   remote_story_change()
@@ -242,17 +261,28 @@ function refilter(): void {
     })
 }
 
-async function reload(): Promise<void> {
-  document.querySelectorAll("#stories .story").forEach((x) => {
-    x.outerHTML = ""
-  })
+async function reload(try_cache = true): Promise<void> {
+  console.log("reload called, try_cache:", try_cache)
+  const btn = document.querySelector("#reload_stories_btn")
+  const btn_img = btn?.querySelector("img")
+  btn?.classList.add("disabled")
+  btn_img?.classList.add("rotating")
 
-  const grouped_story_sources =
-    await OnceSettings.instance.grouped_story_sources()
+  try {
+    document.querySelectorAll("#stories .story").forEach((x) => {
+      x.outerHTML = ""
+    })
 
-  if (grouped_story_sources) {
-    story_loader.parallel_load_stories(grouped_story_sources)
-  } else {
-    console.error("no sources", grouped_story_sources)
+    const grouped_story_sources =
+      await OnceSettings.instance.grouped_story_sources()
+
+    if (grouped_story_sources) {
+      await story_loader.parallel_load_stories(grouped_story_sources, try_cache)
+    } else {
+      console.error("no sources", grouped_story_sources)
+    }
+  } finally {
+    btn?.classList.remove("disabled")
+    btn_img?.classList.remove("rotating")
   }
 }
