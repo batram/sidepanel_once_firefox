@@ -281,7 +281,7 @@ export class StoryListItem extends HTMLElement {
 
   swipeable = (): void => {
     let start_offset = -1
-    const threshold = 0.2
+    const threshold = 0.1
 
     const add_background_element = () => {
       this.style.display = "inline-flex"
