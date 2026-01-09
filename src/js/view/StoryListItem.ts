@@ -52,9 +52,11 @@ export class StoryListItem extends HTMLElement {
     this.link.href = redirected_url
     this.link.classList.add("title")
     this.link.innerText = this.story.title
-    this.link.addEventListener("click", () => {
+    this.link.addEventListener("click", (e: MouseEvent) => {
       this.read_btn.classList.add("user_interaction")
       open_story(this.story.href, "_self")
+      e.stopPropagation()
+      e.preventDefault()
     })
     this.link.addEventListener("mouseup", (e: MouseEvent) => {
       if (e.button == 1) {
@@ -446,7 +448,7 @@ export class StoryListItem extends HTMLElement {
 
     comments_link.addEventListener("click", (e) => {
       console.log("clickedy comments link", e)
-      open_story(comments_link.href, "_self")
+      //open_story(comments_link.href, "_self")
     })
 
     const time = document.createElement("div")
@@ -610,10 +612,10 @@ function open_story(href: string, target: string) {
     return
   }
   if (target == "_self") {
-    /* browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      var tab = tabs[0]
-      browser.tabs.update(tab.id, { url: href })
-    }) */
+    browser.tabs.create({
+      url: href,
+      active: true, // Set to false if you want it to open in the background
+    })
   } else {
     window.open(href, target)
   }
