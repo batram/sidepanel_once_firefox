@@ -97,7 +97,11 @@ export function story_elem_button(story: Story): HTMLElement {
     outline_btn.parentElement
       ?.querySelector(".read_btn")
       ?.classList.add("user_interaction")
-    await StoryMap.remote.persist_story_change(story.href, "read_state", "read")
+    await StoryMap.instance.persist_story_change(
+      story.href,
+      "read_state",
+      "read"
+    )
 
     // Use the helper function instead of encodeToReaderModeUrl
     if (e.button === 1) {
@@ -114,7 +118,7 @@ export function story_elem_button(story: Story): HTMLElement {
   return outline_btn
 }
 
-async function openInReaderMode(url: string, newTab: boolean = false) {
+async function openInReaderMode(url: string, newTab = false) {
   let tab: browser.tabs.Tab
   if (newTab) {
     // Create the tab with the standard URL first

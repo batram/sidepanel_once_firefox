@@ -10,6 +10,7 @@ export class BackComms {
   }
 
   static handlers: any[string] = []
+  static localHandlers: Record<string, (event: any, ...args: any[]) => any> = {}
 
   static handlex(
     arg0: string,
@@ -19,7 +20,7 @@ export class BackComms {
     browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       ;(async function () {
         if (msg.cmd == arg0) {
-          var key = await arg1(sender, msg.args.shift(), msg.args)
+          const key = await arg1(sender, msg.args.shift(), msg.args)
           sendResponse({ complete: true, res: key })
         }
       })()
@@ -31,8 +32,8 @@ export class BackComms {
 
   static async invoke(...args: any[]): Promise<any> {
     console.log("invoke", args)
-    let handle = args.shift()
-    let handler = BackComms.handlers[handle]
+    const handle = args.shift()
+    const handler = BackComms.handlers[handle]
     if (handler) {
       return handler(null, args.shift(), args)
     } else {
@@ -60,8 +61,11 @@ export class BackComms {
     ...args: unknown[]
   ) {
     console.log("on", arg0, arg1)
+    // Store handler locally for direct calling
+    BackComms.localHandlers[arg0] = arg1
+
     browser.runtime.onMessage.addListener(async function (msg, sender) {
-      let c = msg.cmd
+      const c = msg.cmd
       if (msg.send == "send" && arg0 == c) {
         console.log("on send recv", arg0, c, msg)
         arg1(sender, ...msg.args)
@@ -69,9 +73,17 @@ export class BackComms {
     })
   }
 
-  static send(...args: any[]) {
-    let cmd = args.shift()
+  static send(...args: any[]): Promise<any> {
+    const cmd = args.shift()
     console.log("send", cmd, args)
+
+    // Check if we have a local handler and call it directly
+    if (BackComms.localHandlers[cmd]) {
+      console.log("Calling local handler for", cmd)
+      BackComms.localHandlers[cmd](null, ...args)
+    }
+
+    // Fall back to browser messaging if no local handler
     return browser.runtime.sendMessage(browser.runtime.id, {
       send: "send",
       cmd: cmd,

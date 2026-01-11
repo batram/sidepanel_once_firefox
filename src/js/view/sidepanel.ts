@@ -96,7 +96,7 @@ async function update_selected(href: string) {
     return
   }
 
-  const story = await StoryMap.remote.find_by_url(href)
+  const story = await StoryMap.instance.find_by_url(href)
 
   if (!story) {
     selected_container.innerHTML = ""

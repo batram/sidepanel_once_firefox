@@ -459,7 +459,7 @@ export class TabWrangler {
       tab_el.dataset.href = href
       if (!title || (href != "about:blank" && title == "about:blank")) {
         // try to find story with url and get title
-        const story = await StoryMap.remote.get(href)
+        const story = await StoryMap.instance.get(href)
         if (story) {
           title = story.title
         }

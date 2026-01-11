@@ -243,17 +243,17 @@ function refilter(): void {
     .querySelectorAll<StoryListItem>(".story")
     .forEach(async (story_el) => {
       const sthref = story_el.dataset.href
-      const story = await StoryMap.remote.get(sthref)
+      const story = await StoryMap.instance.get(sthref)
       const og_filter = story.filter
       filters.filter_story(story).then(async (story) => {
         if (story.filter != og_filter) {
-          StoryMap.remote.persist_story_change(
+          StoryMap.instance.persist_story_change(
             story.href,
             "filter",
             story.filter
           )
           const nstory = new StoryListItem(
-            await StoryMap.remote.get(sthref.toString())
+            await StoryMap.instance.get(sthref.toString())
           )
           story_el.replaceWith(nstory)
         }

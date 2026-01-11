@@ -243,7 +243,7 @@ export class StoryListItem extends HTMLElement {
       if (StoryHistory.instance) {
         StoryHistory.instance.story_change(this.story, new_state, old_state)
       }
-      StoryMap.remote.persist_story_change(
+      StoryMap.instance.persist_story_change(
         this.story.href,
         "read_state",
         new_state
@@ -277,7 +277,7 @@ export class StoryListItem extends HTMLElement {
       const value = !this.story.stared
       this.story.stared = value
       console.debug("click start value", this.story.stared, "setting", value)
-      StoryMap.remote.persist_story_change(this.story.href, "stared", value)
+      StoryMap.instance.persist_story_change(this.story.href, "stared", value)
     })
   }
 
@@ -403,7 +403,7 @@ export class StoryListItem extends HTMLElement {
             "skipped",
             this.story.read_state
           )
-          StoryMap.remote.persist_story_change(
+          StoryMap.instance.persist_story_change(
             this.story.href,
             "read_state",
             "skipped"
@@ -607,7 +607,7 @@ if (window.customElements) {
 }
 
 function open_story(href: string, target: string) {
-  StoryMap.remote.persist_story_change(href, "read_state", "read")
+  StoryMap.instance.persist_story_change(href, "read_state", "read")
   if (target == "middle") {
     return
   }

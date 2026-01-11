@@ -49,7 +49,7 @@ export class StoryMap {
     },
   }
 
-  subscribers: Number[] = []
+  subscribers: number[] = []
 
   constructor() {
     StoryMap.instance = this
@@ -85,19 +85,7 @@ export class StoryMap {
           event.returnValue = true
           break
         case "stories_loaded": {
-          const stories = (args[0] as Record<string, unknown>[]).map(
-            (st_obj: Record<string, unknown>) => {
-              return Story.from_obj(st_obj)
-            }
-          )
-
-          const mapped_stories = await this.add_stories(stories)
-
-          this.get_all_stared().forEach((story) => {
-            mapped_stories.push(story)
-          })
-
-          BackComms.send("story_list", "add_stories", mapped_stories, args[1])
+          this.stories_loaded(args[0] as Story[], args[1] as string)
           break
         }
         default:
@@ -108,7 +96,7 @@ export class StoryMap {
   }
 
   internal_map: Map<string, Story> = new Map()
-  internal_map_ready: boolean = false
+  internal_map_ready = false
   comment_map: Map<string, string> = new Map()
 
   /*
@@ -236,6 +224,22 @@ export class StoryMap {
     return this.map((story) => {
       return story.stared == true
     })
+  }
+
+  async stories_loaded(stories: Story[], bucket: string): Promise<void> {
+    stories = (stories as Record<string, unknown>[]).map(
+      (st_obj: Record<string, unknown>) => {
+        return Story.from_obj(st_obj)
+      }
+    )
+
+    const mapped_stories = await this.add_stories(stories)
+
+    this.get_all_stared().forEach((story) => {
+      mapped_stories.push(story)
+    })
+
+    BackComms.send("story_list", "add_stories", mapped_stories, bucket)
   }
 
   async add(new_story: Story, bucket = "stories"): Promise<Story> {
