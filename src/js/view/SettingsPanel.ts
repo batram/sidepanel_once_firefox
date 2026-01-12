@@ -371,6 +371,83 @@ export class SettingsPanel {
 
   failedSources: Record<string, string> = {}
 
+  private highlight_textarea_content(
+    textareaId: string,
+    searchText: string,
+    shouldOpenPanel = true,
+    triggerInputEvent = false
+  ): void {
+    if (shouldOpenPanel) {
+      // Switch panel to settings directly
+      menu.open_panel("settings")
+    }
+
+    const textarea = document.querySelector<HTMLTextAreaElement>(
+      `#${textareaId}`
+    )
+    if (!textarea) {
+      console.error(`SettingsPanel: ${textareaId} not found!`)
+      return
+    }
+
+    // Trigger input event if needed (for sources highlighting)
+    if (triggerInputEvent) {
+      textarea.dispatchEvent(new Event("input"))
+    }
+
+    if (!shouldOpenPanel) {
+      return // Don't scroll if panel shouldn't be opened
+    }
+
+    // Find the text in the textarea
+    const text = textarea.value
+    const lines = text.split("\n")
+    let startIndex = -1
+
+    // Look for exact match first
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (line === searchText.trim()) {
+        // Find the start position of this line in the full text
+        if (i === 0) {
+          startIndex = 0
+        } else {
+          startIndex = lines.slice(0, i).join("\n").length + 1 // +1 for the newline
+        }
+        break
+      }
+    }
+
+    // If no exact match, try partial match
+    if (startIndex === -1) {
+      startIndex = text.indexOf(searchText)
+    }
+
+    if (startIndex !== -1) {
+      console.log(`SettingsPanel: scrolling to ${textareaId}`, searchText)
+      textarea.focus()
+      textarea.setSelectionRange(startIndex, startIndex + searchText.length)
+      // blur/focus hack to attempt scroll to selection
+      textarea.blur()
+      textarea.focus()
+    } else {
+      console.warn(
+        `SettingsPanel: could not find text in ${textareaId}`,
+        searchText
+      )
+    }
+  }
+
+  public highlight_filter(filter: string, shouldOpenPanel = true): void {
+    console.log("SettingsPanel: highlighting filter", filter)
+    this.highlight_textarea_content(
+      "filter_area",
+      filter,
+      shouldOpenPanel,
+      false
+    )
+  }
+
   public highlight_sources(
     failedSources: Record<string, string>,
     shouldOpenPanel = true
@@ -378,39 +455,15 @@ export class SettingsPanel {
     console.log("SettingsPanel: highlighting sources", failedSources)
     this.failedSources = failedSources
 
-    if (shouldOpenPanel) {
-      // Switch panel to settings directly
-      menu.open_panel("settings")
-    }
-
-    const sources_area =
-      document.querySelector<HTMLTextAreaElement>("#sources_area")
-    if (!sources_area) {
-      console.error("SettingsPanel: sources_area not found!")
-      return
-    }
-
-    // Trigger update
-    sources_area.dispatchEvent(new Event("input"))
-
-    if (shouldOpenPanel) {
-      // Scroll to first error
-      const urls = Object.keys(failedSources)
-      if (urls.length > 0) {
-        const text = sources_area.value
-        const url = urls[0]
-        const idx = text.indexOf(url)
-        if (idx !== -1) {
-          console.log("SettingsPanel: scrolling to", url)
-          sources_area.focus()
-          sources_area.setSelectionRange(idx, idx + url.length)
-          // blur/focus hack to attempt scroll to selection
-          sources_area.blur()
-          sources_area.focus()
-        } else {
-          console.warn("SettingsPanel: could not find url in sources", url)
-        }
-      }
+    // Scroll to first error
+    const urls = Object.keys(failedSources)
+    if (urls.length > 0) {
+      this.highlight_textarea_content(
+        "sources_area",
+        urls[0],
+        shouldOpenPanel,
+        true
+      )
     }
   }
 }

@@ -7,6 +7,7 @@ import { BackComms } from "../data/BackComms"
 import { URLRedirect } from "../data/URLRedirect"
 import { StoryMap } from "../data/StoryMap"
 import { StoryHistory } from "./StoryHistory"
+import { SettingsPanel } from "./SettingsPanel"
 
 export class StoryListItem extends HTMLElement {
   story: Story
@@ -128,8 +129,14 @@ export class StoryListItem extends HTMLElement {
       dinp.classList.add("filter_input")
       dinp.type = "text"
       dinp.value = this.story.filter
-      dinp.disabled = true
       dinp.style.cursor = "pointer"
+      dinp.readOnly = true
+      dinp.addEventListener("click", (event) => {
+        event.stopPropagation()
+        if (SettingsPanel.instance) {
+          SettingsPanel.instance.highlight_filter(this.story.filter, true)
+        }
+      })
       this.filter_btn.prepend(dinp)
       this.filter_btn.style.borderColor = "red"
     }
@@ -223,7 +230,9 @@ export class StoryListItem extends HTMLElement {
   button_events(): void {
     this.filter_btn.onclick = (event) => {
       if (this.classList.contains("filtered")) {
-        BackComms.send("forward_to_parent", "show_filter", this.story.filter)
+        if (SettingsPanel.instance) {
+          SettingsPanel.instance.highlight_filter(this.story.filter, true)
+        }
       } else {
         StoryFilterView.show_filter_dialog(
           event,
