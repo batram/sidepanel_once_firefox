@@ -1,5 +1,3 @@
-//import * as path from "path"
-//import * as fs from "fs"
 import { Story } from "../data/Story"
 import { StoryListItem } from "./StoryListItem"
 import * as outline from "./presenters/outline"

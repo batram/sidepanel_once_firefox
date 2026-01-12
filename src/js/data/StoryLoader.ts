@@ -103,7 +103,6 @@ async function process_story_input(stories: Story[], group_name: string) {
 async function cache_load(url: string, try_cache = true) {
   let cached = null
   if (try_cache) {
-    //TODO: do we need to store the type?
     cached = await get_cached(url)
   }
 

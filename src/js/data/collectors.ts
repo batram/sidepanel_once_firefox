@@ -23,10 +23,7 @@ export declare interface StoryParser {
 }
 
 export function get_active(): StoryParser[] {
-  //TODO: determine if active from settings
-  const normalizedPath = "" //path.join(__dirname, "collectors")
-
-  let collectors = [
+  const collectors = [
     "geny_match",
     "hackernews_html",
     "lobsters_html",

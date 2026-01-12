@@ -93,15 +93,6 @@ export class StoryMap {
   internal_map_ready = false
   comment_map: Map<string, string> = new Map()
 
-  /*
-  forEach(fun: (arg0: Story) => unknown): void {
-    for (const i in this.internal_map) {
-      if (typeof this.internal_map[i] != "function") {
-        fun(this.internal_map[i])
-      }
-    }
-  }
-*/
   map(fun: (arg0: Story) => boolean): Story[] {
     const ar: Story[] = []
     this.internal_map.forEach((x) => {
@@ -120,16 +111,6 @@ export class StoryMap {
       return this.internal_map.get(this.comment_map.get(url))
     }
     return null
-
-    /*
-    for (const i in this.internal_map) {
-      if (typeof this.internal_map[i] != "function") {
-        const story = this.internal_map[i]
-        if (story.matches_url(url)) {
-          return story
-        }
-      }
-    }*/
   }
 
   emit_data_change(
@@ -140,7 +121,6 @@ export class StoryMap {
   ): void {
     if (path.length != 0) {
       if (this.has(path[0])) {
-        //console.debug("fire DataChangeEvent", path, value, previousValue, name)
         const detail: DataChangeEventDetail = {
           story: this.get(path[0]),
           path: path,
@@ -153,9 +133,6 @@ export class StoryMap {
         BackComms.send("story_map", "data_change", detail)
         this.subscribers.forEach((subscriber) => {
           console.log("subbedf==", subscriber)
-          //if (!subscriber.isDestroyed()) {
-          //  subscriber.send("story_map", "data_change", detail)
-          //}
         })
       }
     }
@@ -198,7 +175,7 @@ export class StoryMap {
     return story
   }
 
-  set_initial_stories(stories: Story[]) {
+  set_initial_stories(stories: Story[]): void {
     stories.map((story) => {
       return this.set(story.href, story, true)
     })
@@ -260,14 +237,11 @@ export class StoryMap {
       return new_story
     }
 
-    //old story, add new info if needed
-
     //tags
     if (
       new_story.comment_url == og_story.comment_url &&
       JSON.stringify(new_story.tags) != JSON.stringify(og_story.tags)
     ) {
-      //TODO: are tags different
       const prev_tags = og_story.tags
       new_story.tags.forEach((tag) => {
         if (!og_story.tags.map((t) => t.text).includes(tag.text)) {

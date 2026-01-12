@@ -39,20 +39,6 @@ export class BackComms {
     } else {
       return OnceSettings.instance.handle(null, handle, args)
     }
-    return new Promise(async (resolve, reject) => {
-      console.log("browser.runtime.id", browser.runtime.id)
-      const response = await browser.runtime.sendMessage(browser.runtime.id, {
-        cmd: args.shift(),
-        args: args,
-      })
-
-      if (response && response.complete) {
-        resolve(response.res)
-      } else {
-        console.error(response)
-        reject("Something wrong")
-      }
-    })
   }
 
   static on(
