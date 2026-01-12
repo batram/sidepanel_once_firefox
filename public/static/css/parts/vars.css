@@ -1,82 +1,36 @@
-@media (prefers-color-scheme: light) {
-  body {
-    --main-bg-color: rgb(246, 246, 239);
-    --second-bg-color: #ccc;
-    --highlight-bg-color: rgb(202, 202, 172);
-    --border-color: #b3b3b3;
-    --border-high-color: #b3b3b3;
-    --selected_bg_color: #b3b3b3;
-    --sep-color: rgb(114, 100, 100);
-    --btn-bg-color: none;
-    --input-bg-color: white;
-    --unread-bg-color: var(--main-bg-color);
-    --read-bg-color: var(--second-bg-color);
-    --text-high-color: black;
-    --text-color: #828282;
-    --opacity: 1;
-    color: black;
-  }
+/* Modern theme system using color-scheme and light-dark() */
+:root {
+  /* Theme-aware variables using light-dark() directly */
+  --main-bg-color: light-dark(rgb(246, 246, 239), #282a36);
+  --second-bg-color: light-dark(#ccc, #383a59);
+  --highlight-bg-color: light-dark(rgb(202, 202, 172), #4050ac);
+  --border-color: light-dark(#b3b3b3, #282a36);
+  --border-high-color: light-dark(#b3b3b3, #373f6e);
+  --selected_bg_color: light-dark(#b3b3b3, #4a517be0);
+  --sep-color: light-dark(rgb(114, 100, 100), rgb(114, 100, 100));
+  --btn-bg-color: light-dark(none, #383a59);
+  --input-bg-color: light-dark(white, #383a59);
+  --unread-bg-color: light-dark(rgb(246, 246, 239), #383a59);
+  --read-bg-color: light-dark(#ccc, #282a36);
+  --text-high-color: light-dark(black, #bcc2cd);
+  --text-color: light-dark(#828282, #828282);
+  --opacity: light-dark(1, 0.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    --main-bg-color: #282a36;
-    --second-bg-color: #383a59;
-    --highlight-bg-color: #4050ac;
-    --border-color: #282a36;
-    --border-high-color: #373f6e;
-    --selected_bg_color: #4a517be0;
-    --sep-color: rgb(114, 100, 100);
-    --btn-bg-color: #383a59;
-    --input-bg-color: var(--second-bg-color);
-    --unread-bg-color: var(--second-bg-color);
-    --read-bg-color: var(--main-bg-color);
-    --text-high-color: #bcc2cd;
-    --text-color: #828282;
-    --opacity: 0.8;
-    color: #bcc2cd;
-  }
-
-  #menu .sub img {
-    filter: contrast(0%);
-  }
+/* Default color scheme */
+body {
+  color-scheme: light dark;
+  color: var(--text-high-color);
+  background-color: var(--main-bg-color);
 }
 
-/* Explicit theme overrides for manual theme switching */
+/* Explicit theme overrides */
 body[data-theme="light"] {
-  --main-bg-color: rgb(246, 246, 239);
-  --second-bg-color: #ccc;
-  --highlight-bg-color: rgb(202, 202, 172);
-  --border-color: #b3b3b3;
-  --border-high-color: #b3b3b3;
-  --selected_bg_color: #b3b3b3;
-  --sep-color: rgb(114, 100, 100);
-  --btn-bg-color: none;
-  --input-bg-color: white;
-  --unread-bg-color: var(--main-bg-color);
-  --read-bg-color: var(--second-bg-color);
-  --text-high-color: black;
-  --text-color: #828282;
-  --opacity: 1;
-  color: black;
+  color-scheme: light;
 }
 
 body[data-theme="dark"] {
-  --main-bg-color: #282a36;
-  --second-bg-color: #383a59;
-  --highlight-bg-color: #4050ac;
-  --border-color: #282a36;
-  --border-high-color: #373f6e;
-  --selected_bg_color: #4a517be0;
-  --sep-color: rgb(114, 100, 100);
-  --btn-bg-color: #383a59;
-  --input-bg-color: var(--second-bg-color);
-  --unread-bg-color: var(--second-bg-color);
-  --read-bg-color: var(--main-bg-color);
-  --text-high-color: #bcc2cd;
-  --text-color: #828282;
-  --opacity: 0.8;
-  color: #bcc2cd;
+  color-scheme: dark;
 }
 
 body[data-theme="dark"] #menu .sub img {
