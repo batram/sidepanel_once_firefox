@@ -5,6 +5,7 @@ import { Story } from "./Story"
 import * as story_filters from "./StoryFilters"
 import { LoaderInsights } from "../view/LoaderInsights"
 import { CacheStore } from "./CacheStore"
+import { SettingsPanel } from "../view/SettingsPanel"
 
 async function get_cached(url: string) {
   const cached = await CacheStore.get(url)
@@ -14,14 +15,14 @@ async function get_cached(url: string) {
 
   try {
     if (!Array.isArray(cached)) {
-      throw "cached entry is not Array"
+      throw new Error("cached entry is not Array")
     }
     if (cached.length != 2) {
-      throw "cached entry not length 2"
+      throw new Error("cached entry not length 2")
     }
     const mins_old = (Date.now() - cached[0]) / (60 * 1000)
     if (mins_old > max_mins) {
-      throw "cached entry out of date " + mins_old
+      throw new Error(`cached entry out of date ${mins_old}`)
     } else {
       console.log("cached", mins_old, url)
     }
@@ -39,6 +40,12 @@ export async function parallel_load_stories(
 ): Promise<void> {
   const promises: Promise<void>[] = []
   LoaderInsights.resetErrors()
+
+  // Clear previous source errors
+  if (SettingsPanel.instance) {
+    SettingsPanel.instance.clearSourceErrors()
+  }
+
   for (const group_name in story_groups) {
     menu.add_group(group_name)
     const group = story_groups[group_name]
@@ -54,10 +61,44 @@ export async function parallel_load_stories(
             console.error(e)
             const detail = e instanceof Error ? e.message : String(e)
             const { domain, parserType } = getDomainAndParserType(source_entry)
+
+            let errorType = "Failed"
+            let errorDetail = detail
+
+            // Categorize error types for better user understanding
+            if (detail.includes("Parsing failed:")) {
+              errorType = "Parse Error"
+              errorDetail = detail.replace("Parsing failed: ", "")
+            } else if (detail.includes("JSON parsing failed:")) {
+              errorType = "JSON Error"
+              errorDetail = detail.replace("JSON parsing failed: ", "")
+            } else if (detail.includes("DOM parsing failed:")) {
+              errorType = "DOM Error"
+              errorDetail = detail.replace("DOM parsing failed: ", "")
+            } else if (detail.includes("XML parsing failed:")) {
+              errorType = "XML Error"
+              errorDetail = detail.replace("XML parsing failed: ", "")
+            } else if (detail.includes("HTTP 404")) {
+              errorType = "Not Found"
+              errorDetail = "The requested resource was not found"
+            } else if (detail.includes("HTTP")) {
+              errorType = "HTTP Error"
+              errorDetail = detail
+            }
+
+            // Add error to SettingsPanel
+            if (SettingsPanel.instance) {
+              SettingsPanel.instance.addSourceError(
+                source_entry,
+                errorDetail,
+                "error"
+              )
+            }
+
             LoaderInsights.showError(
-              `Failed: ${domain} [${parserType}]`,
+              `${errorType}: ${domain} [${parserType}]`,
               source_entry,
-              `Source: ${source_entry}\nError: ${detail}`
+              `Source: ${source_entry}\nError: ${errorDetail}`
             )
           })
       )
@@ -120,7 +161,15 @@ async function cache_load(url: string, try_cache = true) {
 
   const parser = story_parser.get_parser_for_url(url)
   if (!parser) {
-    console.info("no parser for", url)
+    // Add warning to SettingsPanel
+    const message =
+      "No handler available for this source type. You may need to add a custom parser."
+
+    // Access SettingsPanel through the global instance
+    if (SettingsPanel.instance) {
+      SettingsPanel.instance.addSourceError(url, message, "warning")
+    }
+
     return
   }
 
@@ -134,18 +183,34 @@ async function cache_load(url: string, try_cache = true) {
   LoaderInsights.show(`Fetching ${domain} [${parserType}]`)
 
   if (cached != null) {
-    if (parser.options.collects == "dom") {
-      cached = story_parser.parse_dom(cached, url)
-    } else if (parser.options.collects == "xml") {
-      cached = story_parser.parse_xml(cached)
+    try {
+      if (parser.options.collects == "dom") {
+        cached = story_parser.parse_dom(cached, url)
+      } else if (parser.options.collects == "xml") {
+        cached = story_parser.parse_xml(cached)
+      }
+      return parser.parse(cached) || []
+    } catch (parseError) {
+      const detail =
+        parseError instanceof Error ? parseError.message : String(parseError)
+      throw new Error(`Parsing failed: ${detail}`)
     }
-    return parser.parse(cached) || []
   } else {
-    const resp = await fetch(url)
-    if (resp.ok) {
-      return story_parser.parse_response(resp, url, og_url) || []
-    } else {
-      throw new Error(`HTTP ${resp.status}: ${resp.statusText}`)
+    try {
+      const resp = await fetch(url)
+      if (resp.ok) {
+        return story_parser.parse_response(resp, url, og_url) || []
+      } else {
+        throw new Error(`HTTP ${resp.status}: ${resp.statusText}`)
+      }
+    } catch (fetchError) {
+      if (
+        fetchError instanceof Error &&
+        fetchError.message.startsWith("Parsing failed:")
+      ) {
+        throw fetchError // Re-throw parsing errors as-is
+      }
+      throw fetchError // Re-throw network errors as-is
     }
   }
 }

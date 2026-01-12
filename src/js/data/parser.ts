@@ -55,24 +55,42 @@ export async function parse_response(
   const parser = get_parser_for_url(og_url)
 
   if (!parser) {
-    throw "no parser found for: " + og_url
+    throw new Error(`no parser found for: ${og_url}`)
   }
 
   if (parser.options.collects == "json") {
-    const json_content = await resp.json()
-    console.log("got json for ", url, parser, json_content)
-    await cache_result(url, [Date.now(), json_content])
-    return parser.parse(json_content, url, og_url)
+    try {
+      const json_content = await resp.json()
+      console.log("got json for ", url, parser, json_content)
+      await cache_result(url, [Date.now(), json_content])
+      return parser.parse(json_content, url, og_url)
+    } catch (parseError) {
+      const detail =
+        parseError instanceof Error ? parseError.message : String(parseError)
+      throw new Error(`JSON parsing failed: ${detail}`)
+    }
   } else if (parser.options.collects == "dom") {
-    const text_content = await resp.text()
-    await cache_result(url, [Date.now(), text_content])
-    const doc = parse_dom(text_content, url)
-    return parser.parse(doc, url, og_url)
+    try {
+      const text_content = await resp.text()
+      await cache_result(url, [Date.now(), text_content])
+      const doc = parse_dom(text_content, url)
+      return parser.parse(doc, url, og_url)
+    } catch (parseError) {
+      const detail =
+        parseError instanceof Error ? parseError.message : String(parseError)
+      throw new Error(`DOM parsing failed: ${detail}`)
+    }
   } else if (parser.options.collects == "xml") {
-    const text_content = await resp.text()
-    await cache_result(url, [Date.now(), text_content])
-    const doc = parse_xml(text_content)
-    return parser.parse(doc, url, og_url)
+    try {
+      const text_content = await resp.text()
+      await cache_result(url, [Date.now(), text_content])
+      const doc = parse_xml(text_content)
+      return parser.parse(doc, url, og_url)
+    } catch (parseError) {
+      const detail =
+        parseError instanceof Error ? parseError.message : String(parseError)
+      throw new Error(`XML parsing failed: ${detail}`)
+    }
   }
 }
 
@@ -81,7 +99,7 @@ function pattern_matches(url: string, patterns: string[]) {
     if (pattern.includes("*")) {
       const split = pattern.split("*")
       if (split.length != 2) {
-        throw "For now only one wildcard * is allowd ..."
+        throw new Error("For now only one wildcard * is allowed in pattern")
       }
 
       if (url.startsWith(split[0]) && url.endsWith(split[1])) {
@@ -101,8 +119,12 @@ export function parse_xml(val: string): Document {
   let doc = dom_parser.parseFromString(val, "text/xml")
 
   if (doc.querySelector("parsererror")) {
-    console.error("xml parser failed", doc.querySelector("parsererror"))
+    const parserError = doc.querySelector("parsererror")
+    console.error("xml parser failed", parserError)
 
+    const errorText = parserError?.textContent || "Unknown XML parsing error"
+
+    // Try to fix common XML issues
     const twice = dom_parser.parseFromString(
       val.replace(/ & /g, " &amp; "),
       "text/xml"
@@ -110,7 +132,7 @@ export function parse_xml(val: string): Document {
     if (!twice.querySelector("parsererror")) {
       doc = twice
     } else {
-      return
+      throw new Error(`XML parsing failed: ${errorText}`)
     }
   }
   return doc

@@ -1,9 +1,8 @@
-import { OnceSettings } from "../OnceSettings"
+import { SettingsPanel } from "./SettingsPanel"
 
 export class LoaderInsights {
   private static el: HTMLElement | null = null
   private static timeout: NodeJS.Timeout | null = null
-  private static failedSources: Map<string, string> = new Map()
 
   static init(): void {
     if (this.el) return
@@ -43,17 +42,17 @@ export class LoaderInsights {
     const container = document.querySelector("#notification_container")
     if (!container) return
 
-    // Deduplicate: if this URL already has an error displayed, skip
-    if (url && this.failedSources.has(url)) {
+    // Deduplicate: check if this URL already has an error displayed in SettingsPanel
+    if (url && SettingsPanel.instance && SettingsPanel.instance.hasError(url)) {
       return
     }
 
-    if (url) {
-      this.failedSources.set(url, detailedMessage || message)
-      // Proactively update Settings highlights in background
-      OnceSettings.instance.highlightSources(
-        Object.fromEntries(this.failedSources),
-        false
+    // Add error to SettingsPanel
+    if (url && SettingsPanel.instance) {
+      SettingsPanel.instance.addSourceError(
+        url,
+        detailedMessage || message,
+        "error"
       )
     }
 
@@ -78,8 +77,11 @@ export class LoaderInsights {
 
     // Clicking the main area navigates to settings
     errorEl.onclick = () => {
-      const failedMap = Object.fromEntries(this.failedSources)
-      OnceSettings.instance.highlightSources(failedMap)
+      if (url && SettingsPanel.instance) {
+        // Navigate to settings and highlight the specific source
+        const failedMap = { [url]: detailedMessage || message }
+        SettingsPanel.instance.highlight_sources(failedMap, true)
+      }
 
       errorEl.classList.remove("visible")
       setTimeout(() => errorEl.remove(), 300)
@@ -105,9 +107,10 @@ export class LoaderInsights {
   }
 
   static resetErrors(): void {
-    this.failedSources.clear()
-    // Clear highlights in Settings panel
-    OnceSettings.instance.highlightSources({}, false)
+    // Clear highlights in Settings panel using the new clean method
+    if (SettingsPanel.instance) {
+      SettingsPanel.instance.clearSourceErrors()
+    }
 
     // Optionally remove existing error elements if we want a fresh start ui-wise too
     const container = document.querySelector("#notification_container")
