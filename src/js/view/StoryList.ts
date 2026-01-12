@@ -6,6 +6,7 @@ import { StoryMap, DataChangeEventDetail } from "../data/StoryMap"
 import * as story_loader from "../data/StoryLoader"
 import * as search from "../data/search"
 import { BackComms } from "../data/BackComms"
+import { URLRedirect } from "../data/URLRedirect"
 
 export class DataChangeEvent extends Event {
   detail: DataChangeEventDetail
@@ -91,6 +92,9 @@ export function remote_story_change(): void {
         break
       case "refilter":
         refilter()
+        break
+      case "update_redirects":
+        update_redirects()
         break
       default:
         console.log("unhandled story_list", cmd)
@@ -283,4 +287,27 @@ async function reload(try_cache = true): Promise<void> {
     btn?.classList.remove("disabled")
     btn_img?.classList.remove("rotating")
   }
+}
+
+function update_redirects(): void {
+  document.querySelectorAll<StoryListItem>(".story").forEach((story_el) => {
+    const href = story_el.dataset.href
+    if (href) {
+      const redirected_url = URLRedirect.redirect_url(href)
+      const title_link = story_el.querySelector("a.title") as HTMLAnchorElement
+      if (title_link) {
+        title_link.href = redirected_url
+      }
+      const og_link = story_el.querySelector("a.og_href") as HTMLAnchorElement
+      if (og_link) {
+        og_link.href = href
+        // Hide OG link if it's the same as redirected URL
+        if (title_link && title_link.href == og_link.href) {
+          og_link.style.display = "none"
+        } else {
+          og_link.style.display = ""
+        }
+      }
+    }
+  })
 }

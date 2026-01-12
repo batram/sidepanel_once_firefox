@@ -1,4 +1,5 @@
 import { OnceSettings } from "../OnceSettings"
+import { BackComms } from "./BackComms"
 
 export class Redirect {
   match_url: string
@@ -9,9 +10,10 @@ export class URLRedirect {
   static dynamic_url_redirects: Redirect[]
 
   static init(): void {
-    const sets = OnceSettings.instance || OnceSettings.remote
+    const sets = OnceSettings.instance
     sets.get_redirectlist().then((x) => {
       URLRedirect.dynamic_url_redirects = x
+      BackComms.send("story_list", "update_redirects")
     })
   }
 

@@ -11,13 +11,12 @@ import { StoryListItem } from "./StoryListItem"
 import { StoryMap } from "../data/StoryMap"
 import { LoaderInsights } from "./LoaderInsights"
 
-//URLRedirect.init()
-
 document.addEventListener("DOMContentLoaded", async () => {
   new OnceSettings()
   new StoryMap()
   new SettingsPanel()
   new StoryHistory()
+  URLRedirect.init()
   story_list.init()
   side_menu.init()
   LoaderInsights.init()

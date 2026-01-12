@@ -73,7 +73,7 @@ export class OnceSettings {
       this.set_theme(theme as "system" | "light" | "dark")
     })
 
-    //URLRedirect.init()
+    URLRedirect.init()
 
     BackComms.handlex("inv_settings", this.handle)
 
@@ -144,6 +144,7 @@ export class OnceSettings {
               break
             case "redirect_list":
               BackComms.send("settings", "set_redirect_area")
+              URLRedirect.init()
               break
             case "theme":
               BackComms.send("settings", "restore_theme_settings")
@@ -400,7 +401,8 @@ export class OnceSettings {
   }
 
   async save_filterlist(filter_list: string[]): Promise<void> {
-    this.pouch_set("filter_list", filter_list, console.log)
+    await this.pouch_set("filter_list", filter_list, console.log)
+    BackComms.send("story_list", "refilter")
   }
 
   default_filterlist = `bbc.co.uk
@@ -447,7 +449,7 @@ export class OnceSettings {
   }
 
   async save_redirectlist(redirect_list: Redirect[]): Promise<void> {
-    this.pouch_set("redirect_list", redirect_list, console.log)
+    await this.pouch_set("redirect_list", redirect_list, console.log)
   }
 
   static parse_redirectlist(lines: string): Redirect[] {

@@ -10,7 +10,10 @@ export class BackComms {
   }
 
   static handlers: any[string] = []
-  static localHandlers: Record<string, (event: any, ...args: any[]) => any> = {}
+  static localHandlers: Record<
+    string,
+    ((event: any, ...args: any[]) => any)[]
+  > = {}
 
   static handlex(
     arg0: string,
@@ -48,7 +51,10 @@ export class BackComms {
   ) {
     console.log("on", arg0, arg1)
     // Store handler locally for direct calling
-    BackComms.localHandlers[arg0] = arg1
+    if (!BackComms.localHandlers[arg0]) {
+      BackComms.localHandlers[arg0] = []
+    }
+    BackComms.localHandlers[arg0].push(arg1)
 
     browser.runtime.onMessage.addListener(async function (msg, sender) {
       const c = msg.cmd
@@ -63,10 +69,12 @@ export class BackComms {
     const cmd = args.shift()
     console.log("send", cmd, args)
 
-    // Check if we have a local handler and call it directly
+    // Check if we have local handlers and call them directly
     if (BackComms.localHandlers[cmd]) {
-      console.log("Calling local handler for", cmd)
-      BackComms.localHandlers[cmd](null, ...args)
+      console.log("Calling local handlers for", cmd)
+      BackComms.localHandlers[cmd].forEach((handler) => {
+        handler(null, ...args)
+      })
     }
 
     // Fall back to browser messaging if no local handler

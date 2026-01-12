@@ -607,16 +607,17 @@ if (window.customElements) {
 }
 
 function open_story(href: string, target: string) {
+  const redirected_url = URLRedirect.redirect_url(href)
   StoryMap.instance.persist_story_change(href, "read_state", "read")
   if (target == "middle") {
     return
   }
   if (target == "_self") {
     browser.tabs.create({
-      url: href,
+      url: redirected_url,
       active: true, // Set to false if you want it to open in the background
     })
   } else {
-    window.open(href, target)
+    window.open(redirected_url, target)
   }
 }
