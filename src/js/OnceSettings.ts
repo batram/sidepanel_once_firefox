@@ -467,7 +467,7 @@ export class OnceSettings {
 
   default_redirectlist =
     OnceSettings.parse_redirectlist(`https:\\/\\/www.reddit.com\\/(.*) => https://old.reddit.com/$1
-         https:\\/\\/(mobile.)?twitter.com\\/(.*) => https://nitter.cc/$1`)
+         https?:\\/\\/(?:www\\.|mobile\\.)?(?:twitter|x)\\.com\\/(.*) => https://nitter.net/$1`)
 
   async highlightSources(
     failedSources: Record<string, string>,
