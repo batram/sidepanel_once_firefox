@@ -6,7 +6,6 @@ export class SettingsPanel {
   static instance: SettingsPanel
   constructor() {
     SettingsPanel.instance = this
-    BackComms.send("settings", "subscribe_to_changes")
     BackComms.on("settings", async (event, cmd: string, ...args: unknown[]) => {
       switch (cmd) {
         case "set_filter_area":
