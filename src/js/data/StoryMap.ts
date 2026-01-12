@@ -70,12 +70,6 @@ export class StoryMap {
 
     BackComms.on("story_map", async (event, cmd, ...args: unknown[]) => {
       switch (cmd) {
-        case "subscribe_to_changes":
-          if (!this.subscribers.includes(event.sender)) {
-            this.subscribers.push(event.sender)
-          }
-          console.log("sub", this.subscribers, event, cmd, args)
-          break
         case "persist_story_change":
           this.persist_story_change(
             args[0] as string,
