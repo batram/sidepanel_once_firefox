@@ -8,13 +8,12 @@
   --border-high-color: light-dark(#b3b3b3, #373f6e);
   --selected_bg_color: light-dark(#b3b3b3, #4a517be0);
   --sep-color: light-dark(rgb(114, 100, 100), rgb(114, 100, 100));
-  --btn-bg-color: light-dark(none, #383a59);
+  --btn-bg-color: light-dark(#383a5900, #383a59);
   --input-bg-color: light-dark(white, #383a59);
   --unread-bg-color: light-dark(rgb(246, 246, 239), #383a59);
   --read-bg-color: light-dark(#ccc, #282a36);
   --text-high-color: light-dark(black, #bcc2cd);
   --text-color: light-dark(#828282, #828282);
-  --opacity: light-dark(1, 0.8);
 }
 
 /* Default color scheme */
@@ -22,6 +21,7 @@ body {
   color-scheme: light dark;
   color: var(--text-high-color);
   background-color: var(--main-bg-color);
+  --opacity: 1;
 }
 
 /* Explicit theme overrides */
@@ -29,10 +29,21 @@ body[data-theme="light"] {
   color-scheme: light;
 }
 
-body[data-theme="dark"] {
-  color-scheme: dark;
+/* System dark mode support */
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) {
+    --opacity: 0.8;
+  }
+
+  #menu .sub img {
+    filter: contrast(0%);
+  }
 }
 
+body[data-theme="dark"] {
+  color-scheme: dark;
+  --opacity: 0.8;
+}
 body[data-theme="dark"] #menu .sub img {
   filter: contrast(0%);
 }
