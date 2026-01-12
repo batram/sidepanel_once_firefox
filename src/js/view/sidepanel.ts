@@ -1,7 +1,6 @@
 import { OnceSettings } from "../OnceSettings"
 import { SettingsPanel } from "./SettingsPanel"
 import { StoryHistory } from "./StoryHistory"
-import { TabWrangler } from "./TabWrangler"
 import { URLRedirect } from "../data/URLRedirect"
 import * as story_list from "./StoryList"
 import * as search from "../data/search"
@@ -24,13 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   LoaderInsights.init()
   search.init_search()
   story_parser.add_all_css_colors()
-  const tab_content = document.querySelector<HTMLElement>("#tab_content")
-  const tab_dropzone = document.querySelector<HTMLElement>("#tab_dropzone")
-  if (tab_content && tab_dropzone) {
-    const tab_wrangler = new TabWrangler(tab_dropzone, tab_content, {
-      addtab_button: true,
-    })
-  }
 
   const dev_cache = false
 

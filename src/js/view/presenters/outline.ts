@@ -1,7 +1,6 @@
 import { Story } from "../../data/Story"
 import { StoryListItem } from "../../view/StoryListItem"
 import * as Readability from "../../third_party/Readability.js"
-import { TabWrangler } from "../../view/TabWrangler"
 import { BackComms } from "../../data/BackComms"
 import { StoryMap } from "../../data/StoryMap"
 import { Presenter, PresenterOptions } from "../../view/presenters_frontend"
@@ -267,7 +266,6 @@ async function outline(url: string): Promise<void> {
 
   const urlfield = document.querySelector<HTMLInputElement>("#urlfield")
   if (urlfield == undefined) {
-    TabWrangler.ops.send_or_create_tab("outline", url)
     return
   }
   //current_tab.set_url(url)

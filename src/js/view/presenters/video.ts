@@ -185,11 +185,11 @@ export function story_elem_button(story: Story, intab = false): HTMLElement {
 
     video_btn.addEventListener("mouseup", (event) => {
       if (event.button == 0) {
-        //TabWrangler.ops.send_or_create_tab("video", story.href)
+        // send_or_create_tab("video", story.href)
       } else if (event.button == 1) {
         event.preventDefault()
         event.stopPropagation()
-        //TabWrangler.ops.send_to_new_tab("video", story.href)
+        // send_to_new_tab("video", story.href)
         return false
       }
       //TODO: show cache options on 2?
@@ -276,8 +276,8 @@ async function video_dl(url: string): Promise<VideoDLInfo> {
 }
 
 export async function present(url: string): Promise<boolean> {
-  let src: { src: string; type?: string; title?: string } = null
-  let title: string = null
+  const src: { src: string; type?: string; title?: string } = null
+  const title: string = null
   /*
   const webview = document.querySelector<Electron.WebviewTag>("#webview")
   const urlfield = document.querySelector<HTMLInputElement>("#urlfield")
