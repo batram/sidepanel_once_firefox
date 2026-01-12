@@ -75,7 +75,11 @@ export class OnceSettings {
     BackComms.on("settings", async (event, cmd, ...args: any[]) => {
       switch (cmd) {
         case "subscribe_to_changes":
-          if (!this.subscribers.includes(event.sender)) {
+          if (
+            event &&
+            event.sender &&
+            !this.subscribers.includes(event.sender)
+          ) {
             this.subscribers.push(event.sender)
           }
           break
@@ -85,30 +89,33 @@ export class OnceSettings {
           break
         case "pouch_set":
           console.log("pouch_set", args[0], args[1])
-          event.returnValue = await this.pouch_set(
-            args[0] as string,
-            args[1],
-            console.log
-          )
+          if (event)
+            event.returnValue = await this.pouch_set(
+              args[0] as string,
+              args[1],
+              console.log
+            )
           break
         case "sync_url": {
           this.set_sync_url(args[0][0] as string)
           break
         }
         case "save_filterlist":
-          event.returnValue = await this.save_filterlist(args[0] as string[])
+          if (event)
+            event.returnValue = await this.save_filterlist(args[0] as string[])
           break
         case "save_redirectlist":
-          event.returnValue = await this.save_redirectlist(
-            args[0] as Redirect[]
-          )
+          if (event)
+            event.returnValue = await this.save_redirectlist(
+              args[0] as Redirect[]
+            )
           break
         case "add_filter":
           this.add_filter(args[0] as string)
           break
         default:
           console.log("unhandled settings", cmd)
-          event.returnValue = null
+          if (event) event.returnValue = null
       }
     })
 

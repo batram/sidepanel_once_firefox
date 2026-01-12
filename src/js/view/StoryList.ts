@@ -72,7 +72,7 @@ export function remote_story_change(): void {
         }
         default:
           console.log("unhandled story_list", cmd)
-          event.returnValue = null
+          if (event) event.returnValue = null
       }
     }
   )

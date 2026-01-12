@@ -37,7 +37,7 @@ export class SettingsPanel {
           break
         default:
           console.log("unhandled settings_panel", cmd)
-          event.returnValue = null
+          if (event) event.returnValue = null
       }
     })
 

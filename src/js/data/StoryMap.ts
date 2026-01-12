@@ -64,7 +64,7 @@ export class StoryMap {
           return this.find_by_url(args[0][0] as string)
         default:
           console.log("unhandled inv_story_map", cmd)
-          event.returnValue = null
+          if (event) event.returnValue = null
       }
     })
 
@@ -82,7 +82,7 @@ export class StoryMap {
             args[1] as string,
             args[2] as Story | string | boolean
           )
-          event.returnValue = true
+          if (event) event.returnValue = true
           break
         case "stories_loaded": {
           this.stories_loaded(args[0] as Story[], args[1] as string)
@@ -90,7 +90,7 @@ export class StoryMap {
         }
         default:
           console.log("unhandled story_map", cmd)
-          event.returnValue = null
+          if (event) event.returnValue = null
       }
     })
   }
