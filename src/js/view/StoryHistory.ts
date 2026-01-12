@@ -43,6 +43,12 @@ export class StoryHistory {
       },
       true
     )
+
+    browser.contextMenus.onClicked.addListener((info, tab) => {
+      if (info.menuItemId === "once_undo") {
+        this.undo()
+      }
+    })
   }
   story_change(
     story: Story,

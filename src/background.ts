@@ -17,6 +17,17 @@ function iniBackground() {
     })
 }
 
+iniBackground()
+
+browser.contextMenus.removeAll()
+browser.contextMenus.create({
+  id: "once_undo",
+  title: "undo",
+  contexts: ["all"],
+  viewTypes: ["sidebar"],
+  documentUrlPatterns: [browser.runtime.getURL("/static/sidepanel.html")],
+})
+
 // Keep heartbeat
 let heartTimer: number | NodeJS.Timeout
 const keepAlive = () => {
@@ -31,5 +42,3 @@ const keepAlive = () => {
   }, 10000)
 }
 keepAlive()
-
-iniBackground()
