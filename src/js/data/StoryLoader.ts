@@ -46,27 +46,16 @@ export async function parallel_load_stories(
       promises.push(
         cache_load(source_entry, try_cache)
           .then((stories) => {
-            let domain = "source"
-            try {
-              domain = new URL(source_entry).hostname.replace("www.", "")
-            } catch {
-              domain = source_entry.substring(0, 20)
-            }
-
-            LoaderInsights.show("Processed " + domain)
+            const { domain, parserType } = getDomainAndParserType(source_entry)
+            LoaderInsights.show(`Processed ${domain} [${parserType}]`)
             process_story_input(stories, group_name)
           })
           .catch((e) => {
             console.error(e)
             const detail = e instanceof Error ? e.message : String(e)
-            let domain = "source"
-            try {
-              domain = new URL(source_entry).hostname.replace("www.", "")
-            } catch {
-              domain = source_entry.substring(0, 20)
-            }
+            const { domain, parserType } = getDomainAndParserType(source_entry)
             LoaderInsights.showError(
-              `Failed: ${domain}`,
+              `Failed: ${domain} [${parserType}]`,
               source_entry,
               `Source: ${source_entry}\nError: ${detail}`
             )
@@ -81,6 +70,29 @@ export async function parallel_load_stories(
     console.error(e)
   }
   LoaderInsights.hide()
+}
+
+function getDomainAndParserType(sourceUrl: string): {
+  domain: string
+  parserType: string
+} {
+  const parser = story_parser.get_parser_for_url(sourceUrl)
+  let resolvedUrl = sourceUrl
+  if (parser && parser.resolve_url) {
+    resolvedUrl = parser.resolve_url(sourceUrl)
+  }
+
+  let domain = "source"
+  try {
+    domain = new URL(resolvedUrl).hostname.replace("www.", "")
+  } catch {
+    domain = resolvedUrl.substring(0, 20)
+  }
+
+  return {
+    domain,
+    parserType: parser?.options.type || "Unknown",
+  }
 }
 
 async function process_story_input(stories: Story[], group_name: string) {
@@ -112,19 +124,14 @@ async function cache_load(url: string, try_cache = true) {
     return
   }
 
-  let domain = "source"
-  try {
-    domain = new URL(url).hostname.replace("www.", "")
-  } catch {
-    domain = url.substring(0, 20)
-  }
-  LoaderInsights.show("Fetching " + domain)
-
   const og_url = url
 
   if (parser && parser.resolve_url) {
     url = parser.resolve_url(url)
   }
+
+  const { domain, parserType } = getDomainAndParserType(og_url)
+  LoaderInsights.show(`Fetching ${domain} [${parserType}]`)
 
   if (cached != null) {
     if (parser.options.collects == "dom") {
