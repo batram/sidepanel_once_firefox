@@ -27,18 +27,3 @@ browser.contextMenus.create({
   viewTypes: ["sidebar"],
   documentUrlPatterns: [browser.runtime.getURL("/static/sidepanel.html")],
 })
-
-// Keep heartbeat
-let heartTimer: number | NodeJS.Timeout
-const keepAlive = () => {
-  heartTimer && clearTimeout(heartTimer)
-  heartTimer = setTimeout(() => {
-    /* browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      console.info("[heartbeat]")
-      //tabs.length &&
-      //  chrome.tabs.sendMessage(tabs[0].id, { action: "heartbeat" })
-    }) */
-    keepAlive()
-  }, 10000)
-}
-keepAlive()
