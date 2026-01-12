@@ -47,7 +47,6 @@ export function init(): void {
 }
 
 export function remote_story_change(): void {
-  BackComms.send("story_map", "subscribe_to_changes")
   BackComms.on(
     "story_map",
     async (event, cmd: "data_change", details: DataChangeEventDetail) => {
@@ -77,7 +76,6 @@ export function remote_story_change(): void {
     }
   )
 
-  BackComms.send("settings", "subscribe_to_changes")
   BackComms.on("story_list", async (event, cmd: string, ...args: unknown[]) => {
     switch (cmd) {
       case "add_stories":

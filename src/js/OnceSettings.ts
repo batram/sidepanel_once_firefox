@@ -74,15 +74,6 @@ export class OnceSettings {
 
     BackComms.on("settings", async (event, cmd, ...args: any[]) => {
       switch (cmd) {
-        case "subscribe_to_changes":
-          if (
-            event &&
-            event.sender &&
-            !this.subscribers.includes(event.sender)
-          ) {
-            this.subscribers.push(event.sender)
-          }
-          break
         case "set_theme":
           //TODO: set theme
           //nativeTheme.themeSource = args[0] as "system" | "light" | "dark"
