@@ -26,6 +26,7 @@ export function get_active(): StoryParser[] {
   const collectors = [
     "geny_match",
     "hackernews_html",
+    "json_select",
     "lobsters_html",
     "reddit_json",
     "reddit_rss",
