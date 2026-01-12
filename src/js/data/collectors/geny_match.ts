@@ -3,7 +3,7 @@ export const options = {
   colors: ["rgba(123, 123, 0, 0.56)", "white"],
   description: "Collect stories by parsing HTML and matching selectors",
   pattern: "geny:*",
-  seperator: "§§",
+  separator: "§§",
   collects: "dom",
   settings: {},
 }
@@ -81,9 +81,9 @@ export function parse(doc: Document, url: string, og_url: string): Story[] {
 
   if (
     og_url.startsWith("geny:") &&
-    og_url.split(options.seperator).length >= 3
+    og_url.split(options.separator).length >= 3
   ) {
-    const split = og_url.split(options.seperator, 3)
+    const split = og_url.split(options.separator, 3)
     try {
       selectors = JSON.parse(split[1])
     } catch (e) {
@@ -159,8 +159,8 @@ function parse_tag(tag_sel: TagSelector, story: HTMLElement): StoryTag {
 }
 
 export function resolve_url(entry: string): string {
-  if (entry.startsWith("geny:") && entry.split(options.seperator).length >= 3) {
-    const split = entry.split(options.seperator, 3)
+  if (entry.startsWith("geny:") && entry.split(options.separator).length >= 3) {
+    const split = entry.split(options.separator, 3)
     //const conf = split[1]
     const url = split[2]
     return url
