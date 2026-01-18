@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Once Sidepanel",
   "description": "Put once in your sidepanel",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icons": {
     "48": "static/imgs/icons/mipmap-mdpi/ic_launcher.png"
   },
