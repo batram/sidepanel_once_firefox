@@ -40,7 +40,7 @@ export function parse(doc: Document): Story[] {
       "rest",
       doc.firstElementChild.nodeName,
       doc.firstElementChild.getAttribute("version"),
-      doc
+      doc,
     )
   }
 }
@@ -59,7 +59,7 @@ function parse_rss_2(doc: Document) {
     ],
     content_tags: [
       { tag: "content:encoded", minLength: 1000 },
-      { tag: "description", minLength: 1000 },
+      { tag: "description", minLength: 0 },
     ],
   }
   return common_rss_parser(doc, def)
@@ -97,7 +97,7 @@ declare interface FeedFormat {
 
 function get_feed_value(
   story: Element,
-  tag_formats: (string | FeedFromatTag)[]
+  tag_formats: (string | FeedFromatTag)[],
 ) {
   for (let tag_format of tag_formats) {
     if (typeof tag_format == "string") {
@@ -157,9 +157,13 @@ function common_rss_parser(doc: Document, def: FeedFormat) {
       }
     }
 
-    const title = get_feed_value(story, [def.title_tag])
+    let title = get_feed_value(story, [def.title_tag])
     const link = get_feed_value(story, def.link_tags)
     const content = get_feed_value(story, def.content_tags)
+
+    if (!title && content) {
+      title = content.substring(0, 500)
+    }
 
     if (!link || !title) {
       console.error("no link or title? byebye", story, doc)
