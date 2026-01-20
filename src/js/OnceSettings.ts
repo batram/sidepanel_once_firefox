@@ -221,8 +221,6 @@ export class OnceSettings {
     console.log("set_sync_url", sync_url, old_url)
     if (sync_url != old_url) {
       browser.storage.sync.set({ sync_url: sync_url })
-      //fs.mkdirSync(global.paths.nosync_path, { recursive: true })
-      //fs.writeFileSync(global.paths.sync_url_file, sync_url)
       this.couchdb_sync(sync_url)
     }
   }
@@ -365,24 +363,31 @@ export class OnceSettings {
   }
 
   async save_story(story: Story): Promise<Story> {
-    const resp = await this.once_db
-      .get(this.story_id(story.href))
-      .then((doc) => {
+    const trySave = async (retryCount = 0): Promise<PouchDB.Core.Response | undefined> => {
+      try {
+        const doc = await this.once_db.get(this.story_id(story.href))
         story._id = doc._id
         story._rev = doc._rev
-        return this.once_db.put(story.to_obj())
-      })
-      .catch((err) => {
-        if (err.status == 404) {
+        return await this.once_db.put(story.to_obj())
+      } catch (err: any) {
+        if (err.status === 404) {
+          // Create new story
           story._id = this.story_id(story.href)
           story.ingested_at = Date.now()
-          return this.once_db.put(story.to_obj())
+          return await this.once_db.put(story.to_obj())
+        } else if (err.status === 409 && retryCount < 3) {
+          // Conflict - retry with latest document
+          console.log(`Conflict on story ${story.href}, retrying... (${retryCount + 1}/3)`)
+          return await trySave(retryCount + 1)
         } else {
-          console.error("pouch_set error:", err)
+          console.error("save_story error:", err)
+          return undefined
         }
-      })
+      }
+    }
 
-    if (resp && (resp as PouchDB.Core.Response).rev) {
+    const resp = await trySave()
+    if (resp && resp.rev) {
       story._rev = resp.rev
     }
     return story
@@ -393,30 +398,31 @@ export class OnceSettings {
     value: T,
     callback: () => unknown
   ): Promise<void> {
-    this.once_db
-      .get(id)
-      .then((doc) => {
+    const tryUpdate = async (retryCount = 0): Promise<void> => {
+      try {
+        const doc = await this.once_db.get(id)
         doc.list = value
-        return this.once_db.put(doc)
-      })
-      .then(() => {
+        await this.once_db.put(doc)
         callback()
-      })
-      .catch((err) => {
-        if (err.status == 404) {
-          //create if id don't exist
-          this.once_db
-            .put({
-              _id: id,
-              list: value
-            })
-            .then(() => {
-              callback()
-            })
+      } catch (err: any) {
+        if (err.status === 404) {
+          // Create if id doesn't exist
+          await this.once_db.put({
+            _id: id,
+            list: value
+          })
+          callback()
+        } else if (err.status === 409 && retryCount < 3) {
+          // Conflict - retry with latest document
+          console.log(`Conflict on ${id}, retrying... (${retryCount + 1}/3)`)
+          await tryUpdate(retryCount + 1)
         } else {
           console.error("pouch_set error:", err)
         }
-      })
+      }
+    }
+    
+    tryUpdate()
   }
 
   async add_filter(filter: string): Promise<void> {
