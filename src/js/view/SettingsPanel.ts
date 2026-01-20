@@ -38,6 +38,10 @@ export class SettingsPanel {
           console.debug("restore_cache_settings", args)
           this.restore_cache_settings()
           break
+        case "restore_couch_settings":
+          console.debug("restore_couch_settings", args)
+          this.reset_couch_settings()
+          break
         default:
           console.log("unhandled settings_panel", cmd)
           if (event) event.returnValue = null
@@ -78,6 +82,9 @@ export class SettingsPanel {
         couch_highlights.textContent = ""
         return
       }
+      couch_toggle.textContent = couch_container.classList.contains("masked")
+        ? "👁️"
+        : "🙈"
 
       try {
         const url = new URL(val)
@@ -107,6 +114,14 @@ export class SettingsPanel {
         couch_highlights.textContent = val
       }
     }
+
+    // Make highlights clickable to toggle masking
+    couch_highlights.style.pointerEvents = "auto"
+    couch_highlights.style.cursor = "pointer"
+    couch_highlights.addEventListener("click", () => {
+      couch_container.classList.toggle("masked")
+      updateCouchHighlights()
+    })
 
     couch_toggle.addEventListener("click", (e) => {
       e.preventDefault()
@@ -318,11 +333,20 @@ export class SettingsPanel {
   async reset_couch_settings(): Promise<void> {
     const couch_input = document.querySelector<HTMLInputElement>("#couch_input")
     couch_input.value = await OnceSettings.instance.get_sync_url()
+    // Trigger password highlighting update using existing function
+    couch_input.dispatchEvent(new Event("input"))
   }
 
   save_couch_settings(): void {
     const couch_input = document.querySelector<HTMLInputElement>("#couch_input")
-    OnceSettings.instance.set_sync_url(couch_input.value)
+    OnceSettings.instance.set_sync_url(couch_input.value).then( 
+      () => {
+        // Trigger password highlighting update using existing input event listener
+        couch_input.dispatchEvent(new Event("input"))
+        // Notify other windows to update their CouchDB settings
+        BackComms.send("settings", "restore_couch_settings")
+      }
+    )
   }
 
   async restore_theme_settings(): Promise<void> {
