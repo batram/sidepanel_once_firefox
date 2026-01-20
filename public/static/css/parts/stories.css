@@ -30,6 +30,8 @@
   flex-wrap: wrap;
   width: 100%;
   box-sizing: border-box;
+  will-change: transform;
+  transform: translateX(0);
 }
 
 .bb_slide {

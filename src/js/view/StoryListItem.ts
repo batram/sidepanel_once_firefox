@@ -18,6 +18,8 @@ export class StoryListItem extends HTMLElement {
   filter_btn: HTMLElement
   star_btn: HTMLElement
   substories_el: HTMLElement
+  sw_left: HTMLElement
+  sw_right: HTMLElement
 
   constructor(story: Story) {
     super()
@@ -297,23 +299,31 @@ export class StoryListItem extends HTMLElement {
     const add_background_element = () => {
       this.style.display = "inline-flex"
 
-      const bb_slide_el = document.createElement("div")
-      bb_slide_el.style.height = this.clientHeight + "px"
-      bb_slide_el.style.marginBottom = -this.clientHeight + "px"
-      bb_slide_el.style.lineHeight = this.clientHeight + "px"
-      bb_slide_el.classList.add("bb_slide")
+      if (!this.querySelector(".bb_slide")) {
+        const bb_slide_el = document.createElement("div")
+        bb_slide_el.style.height = this.clientHeight + "px"
+        bb_slide_el.style.marginBottom = -this.clientHeight + "px"
+        bb_slide_el.style.lineHeight = this.clientHeight + "px"
+        bb_slide_el.classList.add("bb_slide")
 
-      const bb_slide_left = document.createElement("div")
-      bb_slide_left.innerText = "read"
-      bb_slide_left.classList.add("swipe_left")
-      bb_slide_el.append(bb_slide_left)
+        const bb_slide_left = document.createElement("div")
+        bb_slide_left.innerText = "read"
+        bb_slide_left.classList.add("swipe_left")
+        bb_slide_left.style.backgroundImage =
+          "linear-gradient(45deg, rgba(0, 128, 0, 0.5), transparent 50%)"
+        bb_slide_el.append(bb_slide_left)
+        this.sw_left = bb_slide_left
 
-      const bb_slide_right = document.createElement("div")
-      bb_slide_right.innerText = "skip"
-      bb_slide_right.classList.add("swipe_right")
-      bb_slide_el.append(bb_slide_right)
+        const bb_slide_right = document.createElement("div")
+        bb_slide_right.innerText = "skip"
+        bb_slide_right.classList.add("swipe_right")
+        bb_slide_right.style.backgroundImage =
+          "linear-gradient(45deg, transparent 50%, rgba(200, 0, 0, 0.5))"
+        bb_slide_el.append(bb_slide_right)
+        this.sw_right = bb_slide_right
 
-      this.before(bb_slide_el)
+        this.before(bb_slide_el)
+      }
     }
 
     const mouse_swipe = (event: MouseEvent) => {
@@ -332,43 +342,32 @@ export class StoryListItem extends HTMLElement {
       }
       swipe(one_touch.clientX)
     }
-
+    
     const swipe = (x: number) => {
+      //check that slide_bb is infront of our story element
+      if (!this.previousElementSibling.classList.contains("bb_slide")) {
+        //find and place in front of story element
+        const bb_slide_el = document.querySelector(".bb_slide")
+        if (bb_slide_el) {
+          this.before(bb_slide_el)
+        }
+      }
       this.style.transition = "none"
       const shift = x - start_offset
       const shift_percent = Math.abs(shift) / this.clientWidth
 
-      const sw_left = document.querySelector<HTMLElement>(".swipe_left")
-      const sw_right = document.querySelector<HTMLElement>(".swipe_right")
 
-      const threshold_percent = shift_percent / threshold
-
-      if (shift < 0) {
-        sw_left.style.display = "none"
-        sw_right.style.display = "block"
-      } else {
-        sw_left.style.display = "block"
-        sw_right.style.display = "none"
+      if (this.sw_left && this.sw_right) {
+        if (shift_percent > threshold) {
+          this.sw_left.style.fontWeight = "bold"
+          this.sw_right.style.fontWeight = "bold"
+        } else {
+          this.sw_left.style.fontWeight = ""
+          this.sw_right.style.fontWeight = ""
+        }
       }
 
-      if (shift_percent > threshold) {
-        sw_left.style.fontWeight = "bold"
-        sw_right.style.fontWeight = "bold"
-      } else {
-        sw_left.style.fontWeight = ""
-        sw_right.style.fontWeight = ""
-      }
-
-      sw_left.style.backgroundImage = `linear-gradient(45deg, rgba(0, 128, 0, ${Math.min(
-        threshold_percent * 0.5,
-        0.5
-      )}), transparent 50% )`
-      sw_right.style.backgroundImage = `linear-gradient(45deg, transparent 50% , rgba(200, 0, 0, ${Math.min(
-        threshold_percent * 0.5,
-        0.5
-      )}))`
-
-      this.style.marginLeft = shift + "px"
+      this.style.transform = `translateX(${shift}px)`
     }
 
     this.addEventListener("touchmove", () => {
@@ -403,7 +402,17 @@ export class StoryListItem extends HTMLElement {
       if (this.parentElement) {
         this.parentElement.style.width = ""
       }
-      const shift = parseInt(this.style.marginLeft)
+      
+      // Extract shift value from transform
+      const transformValue = this.style.transform
+      let shift = 0
+      if (transformValue && transformValue.includes("translateX")) {
+        const match = transformValue.match(/translateX\((-?\d+)px\)/)
+        if (match) {
+          shift = parseInt(match[1])
+        }
+      }
+      
       if (Math.abs(shift) / this.clientWidth > threshold) {
         if (shift < 0) {
           this.read_btn.classList.add("user_interaction")
@@ -428,7 +437,7 @@ export class StoryListItem extends HTMLElement {
 
       start_offset = -1
       this.style.transition = ""
-      this.style.marginLeft = ""
+      this.style.transform = ""
       document.body.style.cursor = ""
       document.removeEventListener("touchmove", touch_swipe)
       document.removeEventListener("pointermove", mouse_swipe)
@@ -598,11 +607,11 @@ export class StoryListItem extends HTMLElement {
         type: this.story.type,
         comment_url: this.story.comment_url,
         timestamp: this.story.timestamp,
-        tags: this.story.tags,
+        tags: this.story.tags
       },
       ...this.story.substories.filter((sub) => {
         return sub.comment_url != this.story.comment_url && sub.timestamp
-      }),
+      })
     ]
 
     subs.forEach((x: SubStory) => {
@@ -624,7 +633,7 @@ function open_story(href: string, target: string) {
   if (target == "_self") {
     browser.tabs.create({
       url: redirected_url,
-      active: true, // Set to false if you want it to open in the background
+      active: true // Set to false if you want it to open in the background
     })
   } else {
     window.open(redirected_url, target)
