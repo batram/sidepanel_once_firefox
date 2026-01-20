@@ -12,7 +12,7 @@ export class OnceSettings {
     "https://news.ycombinator.com/news?p=2",
     "https://news.ycombinator.com/news?p=3",
     "https://lobste.rs/",
-    "https://old.reddit.com/r/netsec/.rss",
+    "https://old.reddit.com/r/netsec/.rss"
   ]
 
   syncHandler: PouchDB.Replication.Sync<Record<string, unknown>>
@@ -32,6 +32,12 @@ export class OnceSettings {
     set_sync_url(url: string): Promise<string> {
       return BackComms.invoke("inv_settings", "set_sync_url", url)
     },
+    get_cache_time(): Promise<number> {
+      return BackComms.invoke("inv_settings", "get_cache_time")
+    },
+    set_cache_time(cache_time: string): Promise<void> {
+      return BackComms.invoke("inv_settings", "set_cache_time", cache_time)
+    },
     get_filterlist(): Promise<string[]> {
       return BackComms.invoke("inv_settings", "get_filterlist")
     },
@@ -43,7 +49,7 @@ export class OnceSettings {
     },
     getAttachment(id: string, key: string): Promise<string> {
       return BackComms.invoke("inv_settings", "getAttachment", id, key)
-    },
+    }
   }
 
   subscribers: number[] = []
@@ -108,6 +114,10 @@ export class OnceSettings {
         case "add_filter":
           this.add_filter(args[0] as string)
           break
+        case "save_cache_time":
+          if (event)
+            event.returnValue = await this.set_cache_time(args[0] as string)
+          break
         default:
           console.log("unhandled settings", cmd)
           if (event) event.returnValue = null
@@ -118,7 +128,7 @@ export class OnceSettings {
       .changes({
         since: "now",
         live: true,
-        include_docs: true,
+        include_docs: true
       })
       .on("change", (change) => {
         console.log("pouch change", change.id, change)
@@ -172,7 +182,7 @@ export class OnceSettings {
     console.log(`Theme set to: ${theme}`)
   }
 
-  async handle(_: any, cmd: string, ...args: any[]) {
+  async handle(_: any, cmd: string, ...args: any[]): Promise<any> {
     const argl = args[0]
     switch (cmd) {
       case "story_sources":
@@ -183,6 +193,10 @@ export class OnceSettings {
         return await this.get_sync_url()
       case "set_sync_url":
         return this.set_sync_url(argl[0] as string)
+      case "get_cache_time":
+        return await this.get_cache_time()
+      case "set_cache_time":
+        return this.set_cache_time(argl[0] as string)
       case "get_filterlist":
         return this.get_filterlist()
       case "get_redirectlist":
@@ -218,6 +232,21 @@ export class OnceSettings {
     return data ? data.sync_url : ""
   }
 
+  async set_cache_time(cache_time: string): Promise<void> {
+    const ct = parseInt(cache_time)
+    const old_time = await this.get_cache_time()
+    console.log("set_cache_time", ct, old_time)
+    if (!Number.isNaN(ct) && ct != old_time) {
+      browser.storage.sync.set({ cache_time: cache_time })
+    }
+  }
+
+  async get_cache_time(): Promise<number> {
+    const data = await browser.storage.sync.get("cache_time")
+    const time = parseInt(data.cache_time)
+    return data && !Number.isNaN(time) ? time : 120
+  }
+
   update_on_change(
     event: PouchDB.Replication.SyncResult<Record<string, unknown>>
   ): void {
@@ -233,7 +262,7 @@ export class OnceSettings {
     const sync_ops = {
       live: true,
       retry: true,
-      batch_size: 100,
+      batch_size: 100
     }
     if (this.syncHandler) {
       this.syncHandler.cancel()
@@ -278,7 +307,7 @@ export class OnceSettings {
         if (err.status == 404) {
           this.once_db.put({
             _id: id,
-            list: fallback_value,
+            list: fallback_value
           })
         }
         return fallback_value
@@ -292,7 +321,7 @@ export class OnceSettings {
   async grouped_story_sources(): Promise<Record<string, string[]>> {
     const story_sources = await this.story_sources()
     const grouped_sources: Record<string, string[]> = {
-      default: [],
+      default: []
     }
     let current_group = "default"
     story_sources.forEach((source_entry) => {
@@ -315,7 +344,7 @@ export class OnceSettings {
     const response = await this.once_db.allDocs({
       include_docs: true,
       startkey: this.story_id("h"),
-      endkey: this.story_id("i"),
+      endkey: this.story_id("i")
     })
 
     return response.rows.map((entry) => {
@@ -379,7 +408,7 @@ export class OnceSettings {
           this.once_db
             .put({
               _id: id,
-              list: value,
+              list: value
             })
             .then(() => {
               callback()

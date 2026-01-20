@@ -6,10 +6,10 @@ import * as story_filters from "./StoryFilters"
 import { LoaderInsights } from "../view/LoaderInsights"
 import { CacheStore } from "./CacheStore"
 import { SettingsPanel } from "../view/SettingsPanel"
+import { OnceSettings } from "../OnceSettings"
 
 async function get_cached(url: string) {
   const cached = await CacheStore.get(url)
-  const max_mins = 5000
 
   if (!cached) return null
 
@@ -21,7 +21,7 @@ async function get_cached(url: string) {
       throw new Error("cached entry not length 2")
     }
     const mins_old = (Date.now() - cached[0]) / (60 * 1000)
-    if (mins_old > max_mins) {
+    if (mins_old > await OnceSettings.instance.get_cache_time()) {
       throw new Error(`cached entry out of date ${mins_old}`)
     } else {
       console.log("cached", mins_old, url)
@@ -132,7 +132,7 @@ function getDomainAndParserType(sourceUrl: string): {
 
   return {
     domain,
-    parserType: parser?.options.type || "Unknown",
+    parserType: parser?.options.type || "Unknown"
   }
 }
 
@@ -146,7 +146,7 @@ async function process_story_input(stories: Story[], group_name: string) {
     story.tags.push({
       class: "group",
       text: "*" + group_name,
-      href: "search:" + "*" + group_name,
+      href: "search:" + "*" + group_name
     })
   })
   StoryMap.remote.stories_loaded(all_stories, "stories")

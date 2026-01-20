@@ -34,6 +34,10 @@ export class SettingsPanel {
           console.debug("restore_animation_settings", args)
           this.restore_animation_settings()
           break
+        case "restore_cache_settings":
+          console.debug("restore_cache_settings", args)
+          this.restore_cache_settings()
+          break
         default:
           console.log("unhandled settings_panel", cmd)
           if (event) event.returnValue = null
@@ -282,6 +286,31 @@ export class SettingsPanel {
       } else if (e.key == "s" && e.ctrlKey) {
         //CTRL + s
         this.save_redirect_settings()
+      }
+    })
+
+    // Cache timing settings
+    this.restore_cache_settings()
+    const cache_time_input = document.querySelector<HTMLInputElement>("#cache_time_input")
+    const cache_block = cache_time_input.closest(".settings_block")
+    cache_block
+      .querySelector("#cache_time_save")
+      .addEventListener("click", () => {
+        this.save_cache_settings()
+      })
+    cache_block
+      .querySelector("#cache_time_cancel")
+      .addEventListener("click", () => {
+        this.restore_cache_settings()
+      })
+
+    cache_time_input.addEventListener("keydown", (e) => {
+      if (e.keyCode === 27) {
+        //ESC
+        this.restore_cache_settings()
+      } else if (e.key == "s" && e.ctrlKey) {
+        //CTRL + s
+        this.save_cache_settings()
       }
     })
   }
@@ -541,5 +570,19 @@ export class SettingsPanel {
         )
       }
     }
+  }
+
+  async restore_cache_settings(): Promise<void> {
+    const cache_time_input = document.querySelector<HTMLInputElement>("#cache_time_input")
+    const cache_time = await OnceSettings.instance.get_cache_time()
+    cache_time_input.value = cache_time.toString()
+  }
+
+  async save_cache_settings(): Promise<void> {
+    const cache_time_input = document.querySelector<HTMLInputElement>("#cache_time_input")
+    const cache_time = cache_time_input.value
+    await OnceSettings.instance.set_cache_time(cache_time)
+    // Notify other windows to update their cache settings
+    BackComms.send("settings", "restore_cache_settings")
   }
 }
