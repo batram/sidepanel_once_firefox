@@ -35,6 +35,13 @@ body {
   opacity: 0.7;
 }
 
+/* Firefox scrollbar styling */
+html,
+body {
+  scrollbar-width: thin;
+  scrollbar-color: #0000008c transparent;
+}
+
 /* Generic Components */
 .bar {
   border-bottom: thin solid var(--border-high-color);
