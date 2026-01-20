@@ -5,6 +5,8 @@
   "main": "dist/main.js",
   "scripts": {
     "b2": "webpack --config webpack/webpack.config.js",
+    "b1": "webpack --config webpack/webpack.dev.config.js",
+    "build-dev": "webpack --config webpack/webpack.dev.config.js",
     "webex": "web-ext build --source-dir ./dist"
   },
   "author": "",
